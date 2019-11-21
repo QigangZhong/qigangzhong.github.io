@@ -39,6 +39,7 @@ author: 网络
 java不能直接访问操作系统底层，通过本地方法来实现，Unsafe类提供了硬件级别的原子操作，CAS相关的原子操作类AtomicXXX都是通过Unsafe类来实现的
 
 Unsafe的作用:
+
 * 分配内存/释放内存
 
 ```java
@@ -64,7 +65,7 @@ public final class Unsafe {
     public native int arrayBaseOffset(Class class1);
     public native int arrayIndexScale(Class class1);
 
-    static 
+    static
     {
         ARRAY_INT_BASE_OFFSET = theUnsafe.arrayBaseOffset(int[].class);
         ARRAY_INT_INDEX_SCALE = theUnsafe.arrayIndexScale(int[].class);
@@ -122,7 +123,6 @@ public native void unpark(Object var1);
 public native void park(boolean var1, long var2);
 ```
 
-
 ### 3. 原子操作相关类
 
 > 原子类型位于java.util.concurrent.atomic包下，主要分为4种类型：
@@ -178,7 +178,7 @@ public class AtomicStampedReferenceDemo {
         for(int i = 0 ; i < 3 ; i++) {
             final int timestamp=money.getStamp();
             new Thread() {  
-                public void run() { 
+                public void run() {
                     while(true){
                        while(true){
                            Integerm=money.getReference();
@@ -193,13 +193,13 @@ public class AtomicStampedReferenceDemo {
                              }
                        }
                     }
-                } 
+                }
             }.start();
          }
-        
+
        //用户消费线程，模拟消费行为
-        new Thread() { 
-             publicvoid run() { 
+        new Thread() {
+             publicvoid run() {
                 for(int i=0;i<100;i++){
                    while(true){
                         int timestamp=money.getStamp();
@@ -217,8 +217,8 @@ public class AtomicStampedReferenceDemo {
                     }
                     try {Thread.sleep(100);} catch (InterruptedException e) {}
                  }
-            } 
-        }.start(); 
+            }
+        }.start();
     }
  }
 ```
@@ -303,9 +303,12 @@ class Person {
 > 5. 只能修改可见字段，比如private字段无法修改
 
 ## 参考
+
 [JAVA并发编程学习笔记之Unsafe类](https://blog.csdn.net/aesop_wubo/article/details/7537278)
 
 [Java并发27:Atomic系列-原子类型累加器XxxxAdder和XxxxAccumulator的学习笔记](https://blog.csdn.net/hanchao5272/article/details/79689366)
+
+[什么是 Java 中的 Unsafe 与 CAS ？](https://www.jianshu.com/p/9a1e6940987a)
 
 [Java高并发之无锁与Atomic源码分析](https://www.cnblogs.com/xdecode/p/9022525.html)
 
