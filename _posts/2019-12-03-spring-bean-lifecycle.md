@@ -1,17 +1,5 @@
 ---
 layout: post
-title:  "（[转](https://blog.csdn.net/u012385190/article/details/81368748)）Spring Bean的生命周期"
-categories: spring
-tags:  spring
-author: 网络
----
-
-
-
-
-
----
-layout: post
 title:  "Spring Bean的生命周期"
 categories: spring
 tags:  spring
