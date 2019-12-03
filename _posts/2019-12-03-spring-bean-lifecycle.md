@@ -69,11 +69,11 @@ void destroy() throws Exception;
 //在Bean对象实例化前调用
 @Override
 public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException;
- 
+
 //在Bean对象实例化后调用（如调用构造器之后调用）
 @Override
 public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException;
- 
+
 /**
  * 在设置某个属性前调用，然后再调用设置属性的方法
  * 注意：这里的设置属性是指通过配置设置属性，直接调用对象的setXX方法不会调用该方法，如bean配置中配置了属性address/age属性，将会调用该方法
@@ -82,6 +82,7 @@ public boolean postProcessAfterInstantiation(Object bean, String beanName) throw
 @Override
 public PropertyValues postProcessPropertyValues(PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException;
 ```
+
 #### 2、接口BeanPostProcessor
 
 实例化完成之后调用该接口。可实现的接口方法有：
@@ -89,10 +90,11 @@ public PropertyValues postProcessPropertyValues(PropertyValues pvs, PropertyDesc
 ```java
 //实例化完成，setBeanName/setBeanFactory完成之后调用该方法
 public Object postProcessBeforeInitialization(Object o, String s) throws BeansException;
- 
+
 //全部是实例化完成以后调用该方法
 public Object postProcessAfterInitialization(Object o, String s) throws BeansException;
 ```
+
 这两个接口都在包 org.springframework.beans.factory.config 下，一般称它们的实现类为“后处理器”。后处理器接口一般不由Bean本身实现，实现类以容器附加装置的形式注册到Spring容器中。
 当Sprig容器创建任何Bean的时候，这两个后处理器都会发生作用，所以这两个后处理器的影响是全局的。用户可以通过合理的代码控制后处理器只对固定的Bean创建进行处理。
 Bean级生命周期接口解决Bean个性化处理的问题，Bean容器级生命周期接口解决容器中某些Bean共性化处理的问题。
