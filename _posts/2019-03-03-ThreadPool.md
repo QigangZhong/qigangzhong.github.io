@@ -340,3 +340,5 @@ public static void shutdown() {
 [四种Java线程池用法解析](https://www.cnblogs.com/ruiati/p/6134131.html)
 
 [Java并发编程-ThreadFactory接口](https://blog.csdn.net/chenchaofuck1/article/details/51589774)
+
+[讲讲Java线程池的8大拒绝策略](https://mp.weixin.qq.com/s/kmBhllqG4q_oQiU6R6GTwg)
