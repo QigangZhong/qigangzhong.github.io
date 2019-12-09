@@ -9,9 +9,10 @@ author: 网络
 * content
 {:toc}
 
-总结spring bean基础知识
+转自[Spring Bean的生命周期](https://blog.csdn.net/u012385190/article/details/81368748)
 
-* spring bean 生命周期
+Spring的生命周期是指实例化Bean时所经历的一系列阶段，即通过getBean()获取bean对象及设置对象属性时，Spring框架做了哪些事。Bean的生命周期从Spring容器实例化Bean到销毁Bean。
+本文分别对 BeanFactory 和 ApplicationContext 中的生命周期进行分析。
 
 
 
