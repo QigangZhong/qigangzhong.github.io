@@ -80,7 +80,7 @@ public boolean postProcessAfterInstantiation(Object bean, String beanName) throw
 public PropertyValues postProcessPropertyValues(PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException;
 ```
 
-#### 2、接口BeanPostProcessor
+#### 2、接口：BeanPostProcessor
 
 实例化完成之后调用该接口。可实现的接口方法有：
 
