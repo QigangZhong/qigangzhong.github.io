@@ -86,8 +86,15 @@ public class SpringFactoryBeanApplication {
     public static void main(String[] args) {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("factory-bean.xml");
         //xml中定义的是MyFactoryBean，但实际从容器拿到的是getObject方法返回的MyBean对象
-        MyBean myBean = (MyBean) applicationContext.getBean("mybean");
-        System.out.println(myBean);
+        MyBean myBean1 = (MyBean) applicationContext.getBean("mybean");
+        System.out.println(myBean1);
+        MyBean myBean2 = applicationContext.getBean(MyBean.class);
+        System.out.println(myBean2);
+        System.out.println(myBean1==myBean2);
+
+        //如果想获取到MyFactoryBean本身，在bean名称前加一个&符号即可
+        MyFactoryBean myFactoryBean = (MyFactoryBean) applicationContext.getBean("&mybean");
+        System.out.println(myFactoryBean);
     }
 }
 ```
@@ -112,6 +119,7 @@ public class SpringBootFactoryBeanApplication {
         SpringApplication.run(SpringBootFactoryBeanApplication.class,args);
     }
 
+    //单独注入bean，或者在MyFactoryBean上加@Component注解
     @Bean
     public MyFactoryBean getMyFactoryBean(){
         MyFactoryBean myFactoryBean = new MyFactoryBean();
