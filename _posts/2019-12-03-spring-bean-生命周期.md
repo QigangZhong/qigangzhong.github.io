@@ -371,6 +371,63 @@ public class ApplicationContexBeanLifeCycleMain {
 
 * 4、从上可以看到Bean的生命周期相关接口很多，如果都实现很复杂。通常我们的业务都可以通过 init-method 和 destory-method 方法配置来解决，这样做简单粗暴。
 
+## 补充
+
+### bean初始化和销毁的三种方式
+
+> 在spring容器中有三种方式自定义bean初始化和销毁前所做的操作：
+>
+> * 第一种【推荐】：通过@PostConstruct 和 @PreDestroy 方法 实现初始化后和销毁bean之前进行的操作，可以替代下面两种方式
+>
+> > PostConstruct注解依靠CommonAnnotationBeanPostProcessor的父类InitDestroyAnnotationBeanPostProcessor执行,当你启动注解功能`<context:annotation-config/>`会自动帮你注册CommonAnnotationBeanPostProcessor。当bean初始化的时候(对应方法AbstractAutowireCapableBeanFactory.initializeBean),会执行applyBeanPostProcessorsBeforeInitialization方法:所有注册的BeanPostProcessors的postProcessBeforeInitialization方法都会被执行(你的PostConstruct注解的执行就在这里面的InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization方法)
+>
+> * 第二种是：通过 在xml中定义init-method 和 destory-method方法
+> * 第三种是：通过bean实现InitializingBean和 DisposableBean接口
+
+### bean的作用域
+
+#### xml scope配置
+
+* 1、singleton
+
+```xml
+<bean id="demo" class="com.foo.DemoBean" scope="singleton">
+<bean id="demo" class="com.foo.DemoBean" singleton="true"/>
+```
+
+* 2、prototype
+
+```xml
+<bean id="demo" class="com.foo.DemoBean" scope="prototype"/>
+<bean id="demo" class="com.foo.DemoBean" singleton="false"/>
+```
+
+* 3、request、session、global session
+
+这三种作用域仅在web应用中使用，普通spring应用无效
+
+#### @Scope注解配置
+
+除去xml配置方式外，还可以使用注解配置的方式指定bean的作用域
+
+```java
+@Configuration
+public class MainConfig2 {
+    //@Scope(value = WebApplicationContext.SCOPE_REQUEST)
+    //@Scope(value = WebApplicationContext.SCOPE_SESSION)
+    //@Scope(value = WebApplicationContext.SCOPE_GLOBAL_SESSION)
+    //@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+    @Bean(name = "person")
+    public Person person(){
+        Person person = new Person();
+        return person;
+    }
+}
+```
+
 ## 参考
 
 参考书籍：《精通Spring4.x企业应用开发实战》
+
+[Life Cycle Management of a Spring Bean](https://javabeat.net/life-cycle-management-of-a-spring-bean/)
