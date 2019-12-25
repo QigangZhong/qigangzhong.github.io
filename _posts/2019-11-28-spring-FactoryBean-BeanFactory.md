@@ -245,7 +245,7 @@ public void refresh() throws BeansException, IllegalStateException {
 }
 ```
 
-##### Bean的创建过程
+##### Bean的创建过程（生命周期中的主要方法）
 
 ```java
 AbstractApplicationContext.refresh();
