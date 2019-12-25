@@ -262,7 +262,7 @@ public class BeanFactoryLifeCycleMain {
 
 BeanFactory的Bean生命周期执行步骤如下：
 
-![](https://img-blog.csdn.net/20180802223029954?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTIzODUxOTA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![BeanFactory-BeanLifecycle](https://img-blog.csdn.net/20180802223029954?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTIzODUxOTA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
 
 ## 三、关于BeanFactory的Bean生命周期接口的总结
 
@@ -277,7 +277,7 @@ BeanFactory的Bean生命周期执行步骤如下：
 * 2、如果配置文件中声明了工厂后处理器接口BeanFactoryPostProcessor的实现类，则应用上下文在装载配置文件之后初始化Bean实例之前将调用这些BeanFactoryPostProcessor对配置信息进行加工处理。Spring框架提供了多个工厂后处理器如CustomEditorConfigurer、PopertyPlaceholderConfigurer等。如果配置文件中定义了多个工厂后处理器，最好让它们实现org.springframework.core.Ordered接口，以便Spring以确定的顺序调用它们。工厂后处理器是容器级的，仅在应用上下文初始化时调用一次，其目的是完成一些配置文件的加工处理工作。
   注意：BeanFactoryPostProcessor的接口方法参数是BeanFactory，而在BeanFactory级Bean生命周期中提到的BeanPostProcessor接口方法参数是Bean对象和Bean的ID值。所以前者是针对应用上下文的，后者是针对BeanFactory的。
 * 3、ApplicationContext和BeanFactory另一个最大的不同之处在于：前者会利用Java反射机制自动识别出配置文件中定义的BeanPostProcessor、InstantiationAwareBeanPostProcessor和BeanFactoryPostProcessor，并自动将它们注册到应用上下文中；而后者需要在代码中通过手工调用addBeanPostProcessor()方法进行注册。这也是为什么在应用开发时，我们普遍使用ApplicationContext而很少使用BeanFactory的原因之一。
-* 4、在ApplicationContext中，我们只需要在配置文件中通过<bean>定义工厂后处理器和Bean后处理器，它们就会按预期的方式运行。
+* 4、在ApplicationContext中，我们只需要在配置文件中通过`<bean>`定义工厂后处理器和Bean后处理器，它们就会按预期的方式运行。
 
 ## 五、ApplicationContext的Bean生命周期代码演示
 
@@ -301,7 +301,7 @@ public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 }
 ```
 
-ApplicationContext在启动时，将首先为配置文件中每个<bean>生成一个BeanDefinition对象，BeanDefinition是<bean>在Spring容器中的内部表示。当配置文件中所有的<bean>都被解析成BeanDefinition时，ApplicationContext将调用工厂后处理器的方法，因此我们有机会通过程序的方式调整Bean的配置信息。如上对person的属性address进行更改设置。
+ApplicationContext在启动时，将首先为配置文件中每个`<bean>`生成一个BeanDefinition对象，BeanDefinition是`<bean>`在Spring容器中的内部表示。当配置文件中所有的`<bean>`都被解析成BeanDefinition时，ApplicationContext将调用工厂后处理器的方法，因此我们有机会通过程序的方式调整Bean的配置信息。如上对person的属性address进行更改设置。
 
 #### 2、xml 相关配置
 
@@ -322,6 +322,7 @@ ApplicationContext在启动时，将首先为配置文件中每个<bean>生成�
 <!--3、注册Bean后处理器-->
 <bean id="myBeanFactoryPostProcessor" class="demo02.BeanFactoryLifeCycle.MyBeanFactoryPostProcessor"/>
 ```
+
 > ②和③处定义的BeanPostProcessor和BeanFactoryPostProcessor会自动被ApplicationContext识别并注册到容器中。②处注册的工厂后处理器将会对①处配置的属性值进行调整。在③处，我们还声明了一个Bean后处理器，它也可以对Bean的属性进行调整。启动容器并查看car Bean的信息，我们将发现car Bean的brand属性成功被工厂后处理器更改了。
 
 #### 3、测试类
