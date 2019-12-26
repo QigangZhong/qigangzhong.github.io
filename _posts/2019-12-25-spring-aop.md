@@ -401,4 +401,78 @@ xml配置文件内容只保留两行
 </beans>
 ```
 
+### 源码解析
+
+#### ProxyFactoryBean
+
+xml配置文件中配置的代理类的类型是`org.springframework.aop.framework.ProxyFactoryBean`，是一个[FactoryBean](https://qigangzhong.github.io/2019/11/28/spring-FactoryBean-BeanFactory/#factorybean)，可以猜测到代理类的生成逻辑都在`getObject()`方法里面。
+
+```java
+ProxyFactoryBean.getObject();
+//默认是singleton
+getSingletonInstance();
+getProxy(createAopProxy());
+ProxyCreatorSupport.createAopProxy();
+getAopProxyFactory().createAopProxy(this);
+DefaultAopProxyFactory.createAopProxy();
+
+//********************************************************************************
+@Override
+public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
+    if (config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config)) {
+        Class<?> targetClass = config.getTargetClass();
+        if (targetClass == null) {
+            throw new AopConfigException("TargetSource cannot determine target class: " +
+                                         "Either an interface or a target is required for proxy creation.");
+        }
+        if (targetClass.isInterface() || Proxy.isProxyClass(targetClass)) {
+            return new JdkDynamicAopProxy(config);
+        }
+        return new ObjenesisCglibAopProxy(config);
+    }
+    else {
+        return new JdkDynamicAopProxy(config);
+    }
+}
+//********************************************************************************
+```
+
+> 如果被代理的目标类实现了一个或多个自定义的接口，那么就会使用 JDK 动态代理，如果没有实现任何接口，会使用 CGLIB 实现代理，如果设置了 proxy-target-class=“true”，那么通常都会使用 CGLIB。
+
+回到`ProxyFactoryBean.getProxy()`方法
+
+```java
+ProxyFactoryBean.getProxy();
+//假如使用JDK动态代理，JdkDynamicAopProxy实现InvocationHandler，所以具体生成代理类的逻辑在invoke方法中
+JdkDynamicAopProxy.getProxy();
+Proxy.newProxyInstance(classLoader, proxiedInterfaces, this);
+
+//假如使用CGLib动态代理，执行CglibAopProxy.getProxy方法
+ObjenesisCglibAopProxy.getProxy();
+```
+
+##### JdkDynamicAopProxy
+
+```java
+final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializable{}
+```
+
+
+
+##### ObjenesisCglibAopProxy
+
+```java
+class ObjenesisCglibAopProxy extends CglibAopProxy{}
+```
+
+
+
+#### ProxyFactory
+
+
+
 ## 参考
+
+[Spring源码分析：AOP](https://blog.csdn.net/u014634338/article/details/83866311)
+
+[Spring AOP之坑：完全搞清楚advice的执行顺序]()
