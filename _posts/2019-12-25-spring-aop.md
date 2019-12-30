@@ -96,7 +96,7 @@ author: 网络
 
 ### spring aop的实现方式
 
-#### xml方式（ProxyFactoryBean）
+#### 1. xml方式（ProxyFactoryBean）
 
 定义一个业务服务类：
 
@@ -172,7 +172,7 @@ XML配置
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <!--示例1:拦截所有方法-->
     <bean id="customerService" class="com.qigang.spring_aop.CustomerService">
@@ -192,7 +192,7 @@ XML配置
             </list>
         </property>
     </bean>
-    
+
     <!--示例2:拦截pointcut中指定的方法-->
     <!--<bean id="customerService" class="com.qigang.spring_aop.CustomerService">
         <property name="name" value="nameeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"/>
@@ -235,7 +235,7 @@ try {
 }
 ```
 
-#### 代码方式（ProxyFactory）
+#### 2. 代码方式（ProxyFactory）
 
 利用代码方式可以实现上面一样的功能
 
@@ -257,7 +257,64 @@ try {
 }
 ```
 
-#### aspectj+xml
+> spring中advisor的种类：
+>
+> \* DefaultPointcutAdvisor，配合NameMatchMethodPointcut可以根据名称来匹配需要进行AOP处理的方法，限定在某一个类中的某一些方法
+>
+> \* RegexpMethodPointcutAdvisor，通过正则表达式来对某些类中的某些方法进行AOP处理，范围更广更灵活
+
+#### 3. 自动代理
+
+上面两种方式都是指定了target来进行AOP处理，正常情况不可能每个对象需要AOP处理的时候都设置target单独写一份代码，最好是能针对指定规则的类或者方法进行统一的AOP处理，使用正则表达式来进行灵活规则匹配。
+
+示例中还是使用上方的CustomerService、CustomerInterceptor，使用统一的正则表达式配置来使用CustomerInterceptor对CustomerService进行AOP功能增强。只需要在配置文件中配置autoproxy即可。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!--被代理对象-->
+    <bean id="customerService" class="com.qigang.spring_aop.CustomerService"></bean>
+    <!--advice-->
+    <bean id="customerInterceptor" class="com.qigang.spring_aop.CustomerInterceptor"></bean>
+    <!--advisor-->
+    <bean id="regexpAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+        <property name="advice" ref="customerInterceptor"></property>
+        <!-- 切入点正则表达式 -->
+        <property name="pattern" value="com.qigang.spring_aop.*"></property>
+    </bean>
+
+    <!-- 自动扫描切面代理类 -->
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
+        <property name="optimize" value="true"></property>
+    </bean>
+</beans>
+```
+
+```java
+ApplicationContext appContext = new ClassPathXmlApplicationContext("autoproxy.xml");
+CustomerService cust = (CustomerService) appContext.getBean("customerService");
+cust.printName();
+cust.printURL();
+try {
+    cust.printThrowException();
+} catch (Exception e) {
+    System.out.println("出现异常了...");
+}
+```
+
+##### DefaultAdvisorAutoProxyCreator
+
+可以看出来autoproxy的核心是`DefaultAdvisorAutoProxyCreator`这个类，它是`SmartInstantiationAwareBeanPostProcessor`的一个实现，也就是说是一个`BeanPostProcessor`，所以可以猜测autoproxy的动作应该是通过`postProcessBeforeInstantiation`、`postProcessAfterInstantiation`来实现的。
+
+##### BeanNameAutoProxyCreator
+
+
+
+#### 4. aspectj
+
+##### aspectj+xml
 
 ```java
 public class Logging {
@@ -336,7 +393,7 @@ xml配置文件内容：
 </beans>
 ```
 
-#### aspectj+annotation
+##### aspectj+annotation
 
 ```java
 import org.aspectj.lang.annotation.*;
@@ -403,12 +460,16 @@ xml配置文件内容只保留两行
 
 ### 源码解析
 
+![ProxyFactory_ProxyFactoryBean](/images/spring/ProxyFactory_ProxyFactoryBean.png)
+
 #### ProxyFactoryBean
 
 xml配置文件中配置的代理类的类型是`org.springframework.aop.framework.ProxyFactoryBean`，是一个[FactoryBean](https://qigangzhong.github.io/2019/11/28/spring-FactoryBean-BeanFactory/#factorybean)，可以猜测到代理类的生成逻辑都在`getObject()`方法里面。
 
 ```java
 ProxyFactoryBean.getObject();
+//getObject()第一行代码就是初始化advisor链，也就是xml配置文件中interceptorNames列表里面的对象
+initializeAdvisorChain();
 //默认是singleton
 getSingletonInstance();
 getProxy(createAopProxy());
@@ -443,7 +504,7 @@ public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException 
 
 ```java
 ProxyFactoryBean.getProxy();
-//假如使用JDK动态代理，JdkDynamicAopProxy实现InvocationHandler，所以具体生成代理类的逻辑在invoke方法中
+//假如使用JDK动态代理，JdkDynamicAopProxy实现InvocationHandler，所以具体生成代理类的逻辑在invoke()方法中
 JdkDynamicAopProxy.getProxy();
 Proxy.newProxyInstance(classLoader, proxiedInterfaces, this);
 
@@ -451,28 +512,77 @@ Proxy.newProxyInstance(classLoader, proxiedInterfaces, this);
 ObjenesisCglibAopProxy.getProxy();
 ```
 
+![AopProxyFactory_AopProxy](/images/spring/AopProxyFactory_AopProxy.png)
+
 ##### JdkDynamicAopProxy
+
+如果被代理的类实现了某个接口，就会使用JdkDynamicAopProxy代理，执行invoke方法
 
 ```java
 final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializable{}
+
+invoke();
+
+//**************************************************************************************************
+// Get the interception chain for this method.
+//【核心方法】获取interceptor和advice链
+List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
+
+// Check whether we have any advice. If we don't, we can fallback on direct
+// reflective invocation of the target, and avoid creating a MethodInvocation.
+if (chain.isEmpty()) {
+    // We can skip creating a MethodInvocation: just invoke the target directly
+    // Note that the final invoker must be an InvokerInterceptor so we know it does
+    // nothing but a reflective operation on the target, and no hot swapping or fancy proxying.
+    Object[] argsToUse = AopProxyUtils.adaptArgumentsIfNecessary(method, args);
+    retVal = AopUtils.invokeJoinpointUsingReflection(target, method, argsToUse);
+}
+else {
+    // We need to create a method invocation...
+    invocation = new ReflectiveMethodInvocation(proxy, target, method, args, targetClass, chain);
+    // Proceed to the joinpoint through the interceptor chain.
+    //【核心方法】实际调用，这里会调用实际的interceptor或者advice类的方法，在上方的[xml方式（ProxyFactoryBean）]示例中就是CustomerInterceptor、MyBeforeAdvice、MyAfterAdvice这三个类
+    retVal = invocation.proceed();
+}
+//**************************************************************************************************
 ```
-
-
 
 ##### ObjenesisCglibAopProxy
 
 ```java
 class ObjenesisCglibAopProxy extends CglibAopProxy{}
+
+getProxy();
+//【核心方法】，在获取回调方法的时候创建了DynamicAdvisedInterceptor对象，这个对象的核心方法是invoke()方法
+getCallbacks();
+Callback aopInterceptor = new DynamicAdvisedInterceptor(this.advised);
+//跟JdkDynamicAopProxy.invoke方法类似，里面获取了advice链，逐个执行里面的方法
+DynamicAdvisedInterceptor.invoke();
+
+//**************************************************************************************************
+List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
+Object retVal;
+// Check whether we only have one InvokerInterceptor: that is,
+// no real advice, but just reflective invocation of the target.
+if (chain.isEmpty() && Modifier.isPublic(method.getModifiers())) {
+    // We can skip creating a MethodInvocation: just invoke the target directly.
+    // Note that the final invoker must be an InvokerInterceptor, so we know
+    // it does nothing but a reflective operation on the target, and no hot
+    // swapping or fancy proxying.
+    Object[] argsToUse = AopProxyUtils.adaptArgumentsIfNecessary(method, args);
+    retVal = methodProxy.invoke(target, argsToUse);
+}
+else {
+    // We need to create a method invocation...
+    retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy).proceed();
+}
+//**************************************************************************************************
 ```
 
-
-
 #### ProxyFactory
-
-
 
 ## 参考
 
 [Spring源码分析：AOP](https://blog.csdn.net/u014634338/article/details/83866311)
 
-[Spring AOP之坑：完全搞清楚advice的执行顺序]()
+[Spring源码-AOP](https://my.oschina.net/u/2377110?tab=newest&catalogId=5699788)
