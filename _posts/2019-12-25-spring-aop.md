@@ -310,8 +310,6 @@ try {
 
 ##### BeanNameAutoProxyCreator
 
-
-
 #### 4. aspectj
 
 ##### aspectj+xml
