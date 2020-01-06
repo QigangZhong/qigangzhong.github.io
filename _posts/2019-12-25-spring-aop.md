@@ -306,7 +306,7 @@ try {
 
 ##### DefaultAdvisorAutoProxyCreator、BeanNameAutoProxyCreator
 
-autoproxy的核心是`DefaultAdvisorAutoProxyCreator`，另外还有一个`BeanNameAutoProxyCreator`
+autoproxy的核心是`DefaultAdvisorAutoProxyCreator`，另外还有一个`BeanNameAutoProxyCreator`，以及后面将要介绍的`AspectJAwareAdvisorAutoProxyCreator`。
 
 ![DefaultAdvisorAutoProxyCreator](/images/spring/DefaultAdvisorAutoProxyCreator.jpg)
 
@@ -330,7 +330,14 @@ autoproxy的核心是`DefaultAdvisorAutoProxyCreator`，另外还有一个`BeanN
 >    determineCandidateConstructors 对象实例化时决定要使用的构造函数时被调用
 >    getEarlyBeanReference 循环依赖处理时获取Early对象引用时被调用
 
-自动代理最核心的逻辑都在实例化前`postProcessBeforeInstantiation`以及初始化后`postProcessAfterInitialization`这两个方法中
+自动代理最核心的逻辑都在实例化前`AbstractAutoProxyCreator.postProcessBeforeInstantiation`以及初始化后`AbstractAutoProxyCreator.postProcessAfterInitialization`这两个方法中。
+
+* AbstractAutoProxyCreator.postProcessBeforeInstantiation
+
+  这个方法中主要逻辑在`getCustomTargetSource`以及`createProxy`中，只有当配置了自定义的`customTargetSourceCreators`的时候才会直接创建代理对象，一般情况下不会自定义TargetSourceCreator（参考[TargetSource目标源](https://blog.csdn.net/shenchaohao12321/article/details/85538163)）。
+
+* AbstractAutoProxyCreator.postProcessAfterInitialization
+  这个方法主要逻辑在`wrapIfNecessary`>`getAdvicesAndAdvisorsForBean`>`createProxy`，`getAdvicesAndAdvisorsForBean`是个抽象方法，如果使用的`DefaultAdvisorProxyCreator`，那具体实现在其抽象父类`AbstractAdvisorAutoProxyCreator`中。
 
 #### 4. aspectj
 
@@ -608,3 +615,6 @@ else {
 [Spring源码-AOP](https://my.oschina.net/u/2377110?tab=newest&catalogId=5699788)
 
 [Spring源码-AOP(六)-自动代理与DefaultAdvisorAutoProxyCreator](https://my.oschina.net/u/2377110/blog/1517915)
+[TargetSource目标源](https://blog.csdn.net/shenchaohao12321/article/details/85538163)
+
+[Spring AOP的核心类：AbstractAdvisorAutoProxy自动代理创建器深度剖析（AnnotationAwareAspectJAutoProxyCreator）](https://cloud.tencent.com/developer/article/1497767)
