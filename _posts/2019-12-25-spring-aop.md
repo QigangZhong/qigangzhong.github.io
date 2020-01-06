@@ -304,11 +304,33 @@ try {
 }
 ```
 
-##### DefaultAdvisorAutoProxyCreator
+##### DefaultAdvisorAutoProxyCreator、BeanNameAutoProxyCreator
 
-可以看出来autoproxy的核心是`DefaultAdvisorAutoProxyCreator`这个类，它是`SmartInstantiationAwareBeanPostProcessor`的一个实现，也就是说是一个`BeanPostProcessor`，所以可以猜测autoproxy的动作应该是通过`postProcessBeforeInstantiation`、`postProcessAfterInstantiation`来实现的。
+autoproxy的核心是`DefaultAdvisorAutoProxyCreator`，另外还有一个`BeanNameAutoProxyCreator`
 
-##### BeanNameAutoProxyCreator
+![DefaultAdvisorAutoProxyCreator](/images/spring/DefaultAdvisorAutoProxyCreator.jpg)
+
+![BeanNameAutoProxyCreator](/images/spring/BeanNameAutoProxyCreator.jpg)
+
+这两个类都继承了`AbstractAutoProxyCreator`>`SmartInstantiationAwareBeanPostProcessor`>`InstantiationAwareBeanPostProcessor`>`BeanPostProcessor`。
+
+> BeanPostProcessor的主要方法：
+>
+> 1. **BeanPostProcessor**
+>    postProcessBeforeInitialization 初始化前扩展(执行init-method前)
+>    postProcessAfterInitialization 初始化后扩展(执行init-method后)
+>
+> 2. **InstantiationAwareBeanPostProcessor**
+>    postProcessBeforeInstantiation 对象实例化前扩展
+>    postProcessAfterInstantiation 对象实例化后扩展
+>    postProcessPropertyValues 属性依赖注入前扩展
+>
+> 3. **SmartInstantiationAwareBeanPostProcessor**
+>    predictBeanType 预测bean的类型，在beanFactory的getType时被调用
+>    determineCandidateConstructors 对象实例化时决定要使用的构造函数时被调用
+>    getEarlyBeanReference 循环依赖处理时获取Early对象引用时被调用
+
+自动代理最核心的逻辑都在实例化前`postProcessBeforeInstantiation`以及初始化后`postProcessAfterInitialization`这两个方法中
 
 #### 4. aspectj
 
@@ -584,3 +606,5 @@ else {
 [Spring源码分析：AOP](https://blog.csdn.net/u014634338/article/details/83866311)
 
 [Spring源码-AOP](https://my.oschina.net/u/2377110?tab=newest&catalogId=5699788)
+
+[Spring源码-AOP(六)-自动代理与DefaultAdvisorAutoProxyCreator](https://my.oschina.net/u/2377110/blog/1517915)
