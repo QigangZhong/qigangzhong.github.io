@@ -337,7 +337,7 @@ autoproxy的核心是`DefaultAdvisorAutoProxyCreator`，另外还有一个`BeanN
   这个方法中主要逻辑在`getCustomTargetSource`以及`createProxy`中，只有当配置了自定义的`customTargetSourceCreators`的时候才会直接创建代理对象，一般情况下不会自定义TargetSourceCreator（参考[TargetSource目标源](https://blog.csdn.net/shenchaohao12321/article/details/85538163)）。
 
 * AbstractAutoProxyCreator.postProcessAfterInitialization
-  这个方法主要逻辑在`wrapIfNecessary`>`getAdvicesAndAdvisorsForBean`>`createProxy`，`getAdvicesAndAdvisorsForBean`是个抽象方法，如果使用的`DefaultAdvisorProxyCreator`，那具体实现在其抽象父类`AbstractAdvisorAutoProxyCreator`中。
+  这个方法主要逻辑在`wrapIfNecessary`>`getAdvicesAndAdvisorsForBean`>`wrapIfNecessary`>`getAdvicesAndAdvisorsForBean`>`createProxy`，`getAdvicesAndAdvisorsForBean`是个抽象方法，如果使用的`DefaultAdvisorProxyCreator`，那具体实现在其抽象父类`AbstractAdvisorAutoProxyCreator`中，调试进入到`createProxy`方法中可以看到，在获取到合适的advisors之后，最终还是通过`ProxyFactory`来创建目标对象的代理，而`ProxyFactory`内部在上面的章节分析中可以看出来最终还是通过JDK动态代理或者CGLib动态代理来创建代理对象的，也就是`JDKDynamicAopProxy`和`ObjenesisCglibAopProxy`
 
 #### 4. aspectj
 
