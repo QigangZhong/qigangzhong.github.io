@@ -304,7 +304,7 @@ try {
 }
 ```
 
-##### DefaultAdvisorAutoProxyCreator、BeanNameAutoProxyCreator
+##### DefaultAdvisorAutoProxyCreator
 
 autoproxy的核心是`DefaultAdvisorAutoProxyCreator`，另外还有一个`BeanNameAutoProxyCreator`，以及后面将要介绍的`AspectJAwareAdvisorAutoProxyCreator`。
 
@@ -338,6 +338,25 @@ autoproxy的核心是`DefaultAdvisorAutoProxyCreator`，另外还有一个`BeanN
 
 * AbstractAutoProxyCreator.postProcessAfterInitialization
   这个方法主要逻辑在`wrapIfNecessary`>`getAdvicesAndAdvisorsForBean`>`wrapIfNecessary`>`getAdvicesAndAdvisorsForBean`>`createProxy`，`getAdvicesAndAdvisorsForBean`是个抽象方法，如果使用的`DefaultAdvisorProxyCreator`，那具体实现在其抽象父类`AbstractAdvisorAutoProxyCreator`中，调试进入到`createProxy`方法中可以看到，在获取到合适的advisors之后，最终还是通过`ProxyFactory`来创建目标对象的代理，而`ProxyFactory`内部在上面的章节分析中可以看出来最终还是通过JDK动态代理或者CGLib动态代理来创建代理对象的，也就是`JDKDynamicAopProxy`和`ObjenesisCglibAopProxy`
+
+##### BeanNameAutoProxyCreator
+
+同DefaultAdvisorAutoProxyCreator类似，示例xml配置
+
+```xml
+<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+    <property name="beanNames">
+        <value>*Service</value>
+    </property>
+    <property name="interceptorNames">
+        <list>
+            <value>customerInterceptor</value>
+        </list>
+    </property>
+</bean>
+```
+
+##### AnnotationAwareAspectJAutoProxyCreator
 
 #### 4. aspectj
 
