@@ -512,6 +512,49 @@ xml配置文件内容只保留两行
 
 如果完全去除xml配置文件的话，应用中使用`@EnableAspectJAutoProxy`注解即可
 
+```java
+@Component
+@ComponentScan(basePackages = "com.qigang.aspectj")
+@EnableAspectJAutoProxy
+public class Test {
+    public static void main(String[] args) {
+        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(Test.class);
+        Student student = (Student) applicationContext.getBean("student");
+        student.getName();
+        student.getAge();
+        student.printThrowException();
+    }
+}
+```
+
+###### @EnableAspectJAutoProxy原理
+
+```java
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Import(AspectJAutoProxyRegistrar.class)
+public @interface EnableAspectJAutoProxy {
+
+	/**
+	 * Indicate whether subclass-based (CGLIB) proxies are to be created as opposed
+	 * to standard Java interface-based proxies. The default is {@code false}.
+	 */
+	boolean proxyTargetClass() default false;
+
+	/**
+	 * Indicate that the proxy should be exposed by the AOP framework as a {@code ThreadLocal}
+	 * for retrieval via the {@link org.springframework.aop.framework.AopContext} class.
+	 * Off by default, i.e. no guarantees that {@code AopContext} access will work.
+	 * @since 4.3.1
+	 */
+	boolean exposeProxy() default false;
+
+}
+```
+
+核心就是`@Import(AspectJAutoProxyRegistrar.class)`，`AspectJAutoProxyRegistrar`这个类实现了`ImportBeanDefinitionRegistrar`，在`registerBeanDefinitions()`这个实现方法里面通过`AopConfigUtils`向容器里面注册了`AspectJAnnotationAutoProxyCreator`的子类`AnnotationAwareAspectJAutoProxyCreator`，在上面已经介绍过，这个类实现了`SmartInstantiationAwareBeanPostProcessor`，在最主要的实例化前方法`AbstractAutoProxyCreator.postProcessBeforeInstantiation()`和`AbstractAutoProxyCreator.postProcessAfterInitialization()`中通过动态代理来生成代理类。
+
 ### 源码解析
 
 ![ProxyFactory_ProxyFactoryBean](/images/spring/ProxyFactory_ProxyFactoryBean.png)

@@ -27,3 +27,5 @@ author: 网络
 ## 参考
 
 [Spring源码-IOC容器(六)-bean的循环依赖](https://my.oschina.net/u/2377110/blog/979226)
+
+[@Import、DeferredImportSelector、ImportBeanDefinitionRegistrar的使用](https://blog.csdn.net/f641385712/article/details/88554592)
