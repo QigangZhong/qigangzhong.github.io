@@ -358,6 +358,12 @@ autoproxy的核心是`DefaultAdvisorAutoProxyCreator`，另外还有一个`BeanN
 
 ##### AnnotationAwareAspectJAutoProxyCreator
 
+![AnnotationAwareAspectJAutoProxyCreator.jpg](/images/spring/AnnotationAwareAspectJAutoProxyCreator.jpg)
+
+AspectJAwareAdvisorAutoProxyCreator它用于xml配置版的AspectJ切面自动代理创建(`<aop:config/>`)
+
+AnnotationAwareAspectJAutoProxyCreator用于基于注解的自动代理创建(`<aop:aspectj-autoproxy/>` 或 `@EnableAspectJAutoProxy`)
+
 #### 4. aspectj
 
 ##### aspectj+xml
@@ -504,6 +510,8 @@ xml配置文件内容只保留两行
 </beans>
 ```
 
+如果完全去除xml配置文件的话，应用中使用`@EnableAspectJAutoProxy`注解即可
+
 ### 源码解析
 
 ![ProxyFactory_ProxyFactoryBean](/images/spring/ProxyFactory_ProxyFactoryBean.png)
@@ -634,6 +642,7 @@ else {
 [Spring源码-AOP](https://my.oschina.net/u/2377110?tab=newest&catalogId=5699788)
 
 [Spring源码-AOP(六)-自动代理与DefaultAdvisorAutoProxyCreator](https://my.oschina.net/u/2377110/blog/1517915)
+
 [TargetSource目标源](https://blog.csdn.net/shenchaohao12321/article/details/85538163)
 
 [Spring AOP的核心类：AbstractAdvisorAutoProxy自动代理创建器深度剖析（AnnotationAwareAspectJAutoProxyCreator）](https://cloud.tencent.com/developer/article/1497767)
