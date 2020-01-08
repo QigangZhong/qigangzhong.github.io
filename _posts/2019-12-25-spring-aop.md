@@ -317,15 +317,18 @@ autoproxy的核心是`DefaultAdvisorAutoProxyCreator`，另外还有一个`BeanN
 > BeanPostProcessor的主要方法：
 >
 > 1. **BeanPostProcessor**
+>
 >    postProcessBeforeInitialization 初始化前扩展(执行init-method前)
 >    postProcessAfterInitialization 初始化后扩展(执行init-method后)
 >
 > 2. **InstantiationAwareBeanPostProcessor**
+>
 >    postProcessBeforeInstantiation 对象实例化前扩展
 >    postProcessAfterInstantiation 对象实例化后扩展
 >    postProcessPropertyValues 属性依赖注入前扩展
 >
 > 3. **SmartInstantiationAwareBeanPostProcessor**
+>
 >    predictBeanType 预测bean的类型，在beanFactory的getType时被调用
 >    determineCandidateConstructors 对象实例化时决定要使用的构造函数时被调用
 >    getEarlyBeanReference 循环依赖处理时获取Early对象引用时被调用
@@ -337,7 +340,8 @@ autoproxy的核心是`DefaultAdvisorAutoProxyCreator`，另外还有一个`BeanN
   这个方法中主要逻辑在`getCustomTargetSource`以及`createProxy`中，只有当配置了自定义的`customTargetSourceCreators`的时候才会直接创建代理对象，一般情况下不会自定义TargetSourceCreator（参考[TargetSource目标源](https://blog.csdn.net/shenchaohao12321/article/details/85538163)）。
 
 * AbstractAutoProxyCreator.postProcessAfterInitialization
-  这个方法主要逻辑在`wrapIfNecessary`>`getAdvicesAndAdvisorsForBean`>`wrapIfNecessary`>`getAdvicesAndAdvisorsForBean`>`createProxy`，`getAdvicesAndAdvisorsForBean`是个抽象方法，如果使用的`DefaultAdvisorProxyCreator`，那具体实现在其抽象父类`AbstractAdvisorAutoProxyCreator`中，调试进入到`createProxy`方法中可以看到，在获取到合适的advisors之后，最终还是通过`ProxyFactory`来创建目标对象的代理，而`ProxyFactory`内部在上面的章节分析中可以看出来最终还是通过JDK动态代理或者CGLib动态代理来创建代理对象的，也就是`JDKDynamicAopProxy`和`ObjenesisCglibAopProxy`
+
+  这个方法主要逻辑在`wrapIfNecessary`>`getAdvicesAndAdvisorsForBean`>`createProxy`，`getAdvicesAndAdvisorsForBean`是个抽象方法，如果使用的`DefaultAdvisorProxyCreator`，那具体实现在其抽象父类`AbstractAdvisorAutoProxyCreator`中，调试进入到`createProxy`方法中可以看到，在获取到合适的advisors之后，最终还是通过`ProxyFactory`来创建目标对象的代理，而`ProxyFactory`内部在上面的章节分析中可以看出来最终还是通过JDK动态代理或者CGLib动态代理来创建代理对象的，也就是`JDKDynamicAopProxy`和`ObjenesisCglibAopProxy`
 
 ##### BeanNameAutoProxyCreator
 
@@ -360,9 +364,9 @@ autoproxy的核心是`DefaultAdvisorAutoProxyCreator`，另外还有一个`BeanN
 
 ![AnnotationAwareAspectJAutoProxyCreator.jpg](/images/spring/AnnotationAwareAspectJAutoProxyCreator.jpg)
 
-AspectJAwareAdvisorAutoProxyCreator它用于xml配置版的AspectJ切面自动代理创建(`<aop:config/>`)
+`AspectJAwareAdvisorAutoProxyCreator`用于xml配置版的AspectJ切面自动代理创建(`<aop:config/>`)
 
-AnnotationAwareAspectJAutoProxyCreator用于基于注解的自动代理创建(`<aop:aspectj-autoproxy/>` 或 `@EnableAspectJAutoProxy`)
+`AnnotationAwareAspectJAutoProxyCreator`用于基于注解的自动代理创建(`<aop:aspectj-autoproxy/>` 或 `@EnableAspectJAutoProxy`)
 
 #### 4. aspectj
 
