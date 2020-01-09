@@ -24,11 +24,18 @@ author: 网络
 
 ## @Import
 
-一般放在@Configuration配置类上，一般导入以下3个实现类
+一般放在@Configuration配置类上，一般导入以下3个实现类，而且这三个类只能配合@Import使用，不能单独通过@Bean加载到容器
 
-* ImportSelector
-* DeferredImportSelector
-* ImportBeanDefinitionRegistrar
+### ImportSelector
+
+在@Configuration中所有的bean处理之前执行
+
+### DeferredImportSelector
+
+在@Configuration中所有的bean处理之后执行，SpringBoot的自动配置EnableAutoConfigurationImportSelector就是使用的这种方式，自动配置必须在自定义配置之后执行
+
+### ImportBeanDefinitionRegistrar
+
 
 ## 参考
 
