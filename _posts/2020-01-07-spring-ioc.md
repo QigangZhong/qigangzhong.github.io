@@ -22,7 +22,13 @@ author: 网络
 
 ## 介绍
 
+## @Import
 
+一般放在@Configuration配置类上，一般导入以下3个实现类
+
+* ImportSelector
+* DeferredImportSelector
+* ImportBeanDefinitionRegistrar
 
 ## 参考
 
