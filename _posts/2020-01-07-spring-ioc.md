@@ -22,20 +22,6 @@ author: 网络
 
 ## 介绍
 
-## @Import
-
-一般放在@Configuration配置类上，一般导入以下3个实现类，而且这三个类只能配合@Import使用，不能单独通过@Bean加载到容器
-
-### ImportSelector
-
-在@Configuration中所有的bean处理之前执行
-
-### DeferredImportSelector
-
-在@Configuration中所有的bean处理之后执行，SpringBoot的自动配置EnableAutoConfigurationImportSelector就是使用的这种方式，自动配置必须在自定义配置之后执行，可以通过实现Ordered接口或者打上Order标签来制定顺序。
-
-### ImportBeanDefinitionRegistrar
-
 ## BeanFactory
 
 ## ApplicationContext
@@ -46,7 +32,7 @@ author: 网络
 
 ##### @Configuration加载过程
 
-核心是ConfigurationClassPostProcessor这个类
+核心是ConfigurationClassPostProcessor这个类，它是Spring-Context包提供的内置的BeanFactoryPostProcessor类
 
 ![ConfigurationClassPostProcessor.jpg](/images/spring/ConfigurationClassPostProcessor.jpg)
 
@@ -101,8 +87,8 @@ ConfigurationClassParser#parse#doProcessConfigurationClass
 
 // 回到ConfigurationClassParser#processConfigBeanDefinitions方法，parse方法执行之后会加载BeanDefinition
 // 这里会遍历所有的@Configuration配置类，顺序就是processConfigBeanDefinitions方法中根据配置类按照Ordered或者@Order排序后的顺序
+// 针对每个配置类，内部加载BeanDefinition的顺序为：@Import->@Bean->@ImportResource
 ConfigurationClassBeanDefinitionReader#loadBeanDefinitions
-//针对每个配置类，内部加载BeanDefinition的顺序为：@Import->@Bean->@ImportResource
 
 // ConfigurationClassPostProcessor实现了BeanFactoryPostProcessor
 // 返回Bean的生命周期方法AbstractApplicationContext#refresh#invokeBeanFactoryPostProcessors->PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors
@@ -110,6 +96,30 @@ ConfigurationClassBeanDefinitionReader#loadBeanDefinitions
 ConfigurationClassPostProcessor#postProcessBeanFactory
 ConfigurationClassPostProcessor#enhanceConfigurationClasses
 ```
+
+###### @Import
+
+这个annotation一般放在@Configuration配置类上，一般导入以下3个实现类
+
+* ImportSelector
+
+在@Configuration中所有的bean处理之前执行
+
+* DeferredImportSelector
+
+  * AutoConfigurationImportSelector
+  * EnableCircuitBreakerImportSelector
+
+  > 在@Configuration中所有的bean处理之后执行，SpringBoot的自动配置EnableAutoConfigurationImportSelector就是使用的这种方式，自动配置必须在自定义配置之后执行，可以通过实现Ordered接口或者打上Order标签来制定顺序。
+
+* ImportBeanDefinitionRegistrar
+
+  * AspectJAutoProxyRegistrar
+  * AutoProxyRegistrar
+
+> 这三个类只能配合@Import使用，不能单独通过@Bean加载到容器，但是@Import可以独立使用导入普通的bean
+
+如果配置类加了@Import，在`ConfigurationClassParser#parse#doProcessConfigurationClass#processImports`中进行了处理，`DeferredImportSelector`、`ImportBeanDefinitionRegistrar`先保存在内存变量中，在后面的`ConfigurationClassParser#processDeferredImportSelectors`中最后才进行处理
 
 ## 参考
 
