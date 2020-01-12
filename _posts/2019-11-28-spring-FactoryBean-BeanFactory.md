@@ -141,7 +141,7 @@ public class SpringBootFactoryBeanApplication {
 
 #### 接口类图
 
-![beanfactory](/images/spring/BeanFactory.png)
+![beanfactory](/images/spring/beanfactory.png)
 
 #### 基础实现接口
 

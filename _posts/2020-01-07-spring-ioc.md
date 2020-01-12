@@ -22,17 +22,164 @@ author: 网络
 
 ## 介绍
 
+IOC(Inversion Of Control)/DI(Dependence Injection)的目的是将对象交由容器来管理，在spring中容器的顶层接口是BeanFactory，这个容器接口里面定义了对象bean的各种操作方法。
+
+```java
+public interface BeanFactory {
+	String FACTORY_BEAN_PREFIX = "&";
+	Object getBean(String name) throws BeansException;
+	<T> T getBean(String name, Class<T> requiredType) throws BeansException;
+	Object getBean(String name, Object... args) throws BeansException;
+	<T> T getBean(Class<T> requiredType) throws BeansException;
+	<T> T getBean(Class<T> requiredType, Object... args) throws BeansException;
+	boolean containsBean(String name);
+	boolean isSingleton(String name) throws NoSuchBeanDefinitionException;
+	boolean isPrototype(String name) throws NoSuchBeanDefinitionException;
+	boolean isTypeMatch(String name, ResolvableType typeToMatch) throws NoSuchBeanDefinitionException;
+	boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException;
+	Class<?> getType(String name) throws NoSuchBeanDefinitionException;
+	String[] getAliases(String name);
+}
+```
+
+BeanFactory在spring中有一个常用的默认实现DefaultListableBeanFactory
+
+![beanfactory.png](/images/spring/beanfactory.png)
+
 ## BeanFactory
+
+### 基本示例
+
+对象bean的定位(Resource)、解析(XmlBeanDefinitionReader)、注册(BeanDefinitionReaderUtils.registerBeanDefinition)都通过BeanFactory来完成。下面以spring中BeanFactory的实现DefaultListableBeanFactory来做一个简单示例，通过xml文件配置的方式来管理对象bean：
+
+```java
+DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+reader.loadBeanDefinitions(new ClassPathResource("bean-factory.xml"));
+MyBean bean = factory.getBean(MyBean.class);
+System.out.println(bean.toString());
+```
+
+```java
+public class MyBean {
+    private String name;
+    private Integer age;
+
+    //getters,setters,toString...
+}
+```
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean id="mybean" class="com.qigang.sblc.factoryBean.MyFactoryBean">
+        <property name="name" value="zhangsan"/>
+        <property name="age" value="30"/>
+    </bean>
+</beans>
+```
+
+### 源码解析
+
+上面示例的核心逻辑就在下面：
+
+```java
+// 加载xml配置文件中的信息
+// 使用的是DOM的方式解析XML
+XmlBeanDefinitionReader#doLoadDocument
+// 使用BeanDefinitionDocumentReader解析出Document对象
+XmlBeanDefinitionReader#registerBeanDefinitions
+DefaultBeanDefinitionDocumentReader#registerBeanDefinitions#doRegisterBeanDefinitions
+DefaultBeanDefinitionDocumentReader#parseBeanDefinitions
+//【核心方法】解析XML文件中spring默认namespace的XML节点
+DefaultBeanDefinitionDocumentReader#parseDefaultElement
+//*************************************************************
+private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
+    if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) {
+        importBeanDefinitionResource(ele);
+    }
+    else if (delegate.nodeNameEquals(ele, ALIAS_ELEMENT)) {
+        processAliasRegistration(ele);
+    }
+    else if (delegate.nodeNameEquals(ele, BEAN_ELEMENT)) {
+        //这里是<bean>节点的处理逻辑
+        processBeanDefinition(ele, delegate);
+    }
+    else if (delegate.nodeNameEquals(ele, NESTED_BEANS_ELEMENT)) {
+        // recurse
+        doRegisterBeanDefinitions(ele);
+    }
+}
+//*************************************************************
+
+//解析BeanDefinition，放入一个holder中
+DefaultBeanDefinitionDocumentReader#processBeanDefinition
+BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
+BeanDefinitionParserDelegate#parseBeanDefinitionElement
+BeanDefinitionParserDelegate#createBeanDefinition
+//【创建BeanDefinition】
+BeanDefinitionReaderUtils#createBeanDefinition
+BeanDefinitionParserDelegate#parseBeanDefinitionAttributes
+//...针对BeanDefinition的其它操作
+BeanDefinitionParserDelegate#parsePropertyElements
+
+
+//【注册BeanDefinition到spring容器中】
+//回到DefaultBeanDefinitionDocumentReader#processBeanDefinition
+//其实就是注册到DefaultListableBeanFactory的ConcurrentHashMap中
+BeanDefinitionReaderUtils#registerBeanDefinition
+```
+
+经过上面的复杂步骤，BeanDefinition就被注册到spring容器里面了，但这个时候bean还没有实例化，真正实例化是在DefaultListableBeanFactory.getBean方法中
+
+```java
+DefaultListableBeanFactory#getBean
+DefaultListableBeanFactory#resolveNamedBean
+AbstractBeanFactory#getBean#doGetBean
+//默认bean是单例的
+AbstractBeanFactory#createBean
+AbstractAutowireCapableBeanFactory#createBean
+//在这里调用了InstantiationAwareBeanPostProcessor.postProcessBeforeInstantiation
+AbstractAutowireCapableBeanFactory#resolveBeforeInstantiation
+AbstractAutowireCapableBeanFactory#doCreateBean
+AbstractAutowireCapableBeanFactory#createBeanInstance
+AbstractAutowireCapableBeanFactory#instantiateBean
+SimpleInstantiationStrategy#instantiate
+//【通过反射实例化bean】
+BeanUtils.instantiateClass
+//返回AbstractAutowireCapableBeanFactory#doCreateBean
+//设置bean的属性，并且在这里调用了InstantiationAwareBeanPostProcessor.postProcessAfterInstantiation/postProcessPropertyValues
+AbstractAutowireCapableBeanFactory#populateBean
+//【实例化之后进行初始化】
+//这个方法也比较重要，在这个方法里面调用了invokeAwareMethods/applyBeanPostProcessorsBeforeInitialization/invokeInitMethods/applyBeanPostProcessorsAfterInitialization
+AbstractAutowireCapableBeanFactory#initializeBean
+```
 
 ## ApplicationContext
 
-### refresh
+这种直接使用BeanFactory的方式比较原始，且使用不方便，实际开发中会使用BeanFactory的更高级的接口ApplicationContext以及其具体的实现类，ApplicationContext继承了BeanFactory的同时还提供了其它功能：
+
+* ClassPathXmlApplicationContext/FileSystemXmlApplicationContext
+
+* AnnotationConfigApplicationContext
+
+* XmlWebApplicationContext
+
+这两个实现类在new的时候都调用了`AbstractApplicationContext.refresh`这个spring容器最重要的方法。
+
+### AbstractApplicationContext.refresh
+
+这个方法包含了bean的整个生命周期，主要做的事情如下：
+
+![bean-lifecycle.jpg](/images/spring/bean-lifecycle.jpg)
 
 #### invokeBeanFactoryPostProcessors
 
 ##### @Configuration加载过程
 
-核心是ConfigurationClassPostProcessor这个类，它是Spring-Context包提供的内置的BeanFactoryPostProcessor类
+核心是ConfigurationClassPostProcessor这个类，它是Spring-Context包提供的内置的BeanFactoryPostProcessor类，从refresh方法开始，跟踪一下一个配置类是如何被加载的。
 
 ![ConfigurationClassPostProcessor.jpg](/images/spring/ConfigurationClassPostProcessor.jpg)
 
