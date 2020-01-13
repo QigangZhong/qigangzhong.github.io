@@ -50,43 +50,69 @@ author: 网络
   >
   > 假设定义了EmployeeManager接口。
   >
-  > 1）
+  > 1)
   > execution(* com.howtodoinjava.EmployeeManager.*(..))
+  >
   > 以上切入点表达式可以匹配EmployeeManger接口中所有的方法。
-  > 2）
+  >
+  > 2)
+  >
   > 当切面方法和EmployeeManager接口在相同的包内，如果切入点表达式匹配所有所有方法，则表达式可以改成：
+  >
   > execution(* EmployeeManager.*(..))
-  > 3）匹配EmployeeManager接口的所有public方法。
+  >
+  > 3) 匹配EmployeeManager接口的所有public方法。
+  >
   > execution(public * EmployeeManager.*(..))
+  >
   > 4) 匹配EmployeeManager接口中权限为public并返回类型为EmployeeDTO的所有方法。
+  >
   > execution(public EmployeeDTO EmployeeManager.*(..))
-  > 5） 匹配EmployeeManager接口中权限为public并返回类型为EmployeeDTO，第一个参数为EmployeeDTO类型的所有方法。
+  >
+  > 5) 匹配EmployeeManager接口中权限为public并返回类型为EmployeeDTO，第一个参数为EmployeeDTO类型的所有方法。
+  >
   > execution(public EmployeeDTO EmployeeManager.*(EmployeeDTO, ..))
-  > 6） 匹配EmployeeManager接口中权限为public、返回类型为EmployeeDTO，参数明确定义为EmployeeDTO,Integer的所有方法。
+  >
+  > 6) 匹配EmployeeManager接口中权限为public、返回类型为EmployeeDTO，参数明确定义为EmployeeDTO,Integer的所有方法。
   > execution(public EmployeeDTO EmployeeManager.*(EmployeeDTO, Integer))
   >
   >
   > 2. 类型标签匹配模式
-  > 1）匹配在com.howtodoinjava包下所有类型中所有的方法。
+  >
+  > 1) 匹配在com.howtodoinjava包下所有类型中所有的方法
+  >
   > within(com.howtodoinjava.*)
-  > 2）匹配在com.howtodoinjava包以及其子包下所有类型中所有的方法。
+  >
+  > 2) 匹配在com.howtodoinjava包以及其子包下所有类型中所有的方法
+  >
   > within(com.howtodoinjava..*)
-  > 3）匹配其他包一个类下的所有方法。
+  >
+  > 3) 匹配其他包一个类下的所有方法
+  >
   > within(com.howtodoinjava.EmployeeManagerImpl)
-  > 4）匹配同一个包下一个类下的所有方法。
+  >
+  > 4) 匹配同一个包下一个类下的所有方法
+  >
   > within(EmployeeManagerImpl)
-  > 5）匹配一个接口下的所有继承者的所有方法。
+  >
+  > 5) 匹配一个接口下的所有继承者的所有方法
+  >
   > within(EmployeeManagerImpl+)
   >
   >
   > 3. bean名字匹配模式
-  > 匹配所有以Manager结尾的beans中的所有方法。
+  >
+  > 匹配所有以Manager结尾的beans中的所有方法
+  >
   > bean(*Manager)
   >
   >
   > 4. 切入点表达式拼接
-  > 在AspectJ中，切入点表达式可以通过&&，||，!等操作符进行拼接。
+  >
+  > 在AspectJ中，切入点表达式可以通过&&，||，!等操作符进行拼接
+  >
   > bean(*Manager) || bean(*DAO)
+  >
 
 * Introduction：给原有的类引入新的接口功能，参考[示例](https://gitee.com/qigangzhong/springdemo/tree/master/aop/src/main/java/com/qigang/spring_aop/introduction)
 
@@ -306,31 +332,36 @@ try {
 
 ##### DefaultAdvisorAutoProxyCreator
 
-autoproxy的核心是`DefaultAdvisorAutoProxyCreator`，另外还有一个`BeanNameAutoProxyCreator`，以及后面将要介绍的`AspectJAwareAdvisorAutoProxyCreator`。
+autoproxy的核心是`DefaultAdvisorAutoProxyCreator`，另外还有一个`BeanNameAutoProxyCreator`，以及后面将要介绍的`AspectJAwareAdvisorAutoProxyCreator`等。
 
 ![DefaultAdvisorAutoProxyCreator](/images/spring/DefaultAdvisorAutoProxyCreator.jpg)
 
 ![BeanNameAutoProxyCreator](/images/spring/BeanNameAutoProxyCreator.jpg)
 
-这两个类都继承了`AbstractAutoProxyCreator`>`SmartInstantiationAwareBeanPostProcessor`>`InstantiationAwareBeanPostProcessor`>`BeanPostProcessor`。
+这几个类都继承了`AbstractAutoProxyCreator`>`SmartInstantiationAwareBeanPostProcessor`>`InstantiationAwareBeanPostProcessor`>`BeanPostProcessor`。
 
 > BeanPostProcessor的主要方法：
 >
 > 1. **BeanPostProcessor**
 >
 >    postProcessBeforeInitialization 初始化前扩展(执行init-method前)
+>
 >    postProcessAfterInitialization 初始化后扩展(执行init-method后)
 >
 > 2. **InstantiationAwareBeanPostProcessor**
 >
 >    postProcessBeforeInstantiation 对象实例化前扩展
+>
 >    postProcessAfterInstantiation 对象实例化后扩展
+>
 >    postProcessPropertyValues 属性依赖注入前扩展
 >
 > 3. **SmartInstantiationAwareBeanPostProcessor**
 >
 >    predictBeanType 预测bean的类型，在beanFactory的getType时被调用
+>
 >    determineCandidateConstructors 对象实例化时决定要使用的构造函数时被调用
+>
 >    getEarlyBeanReference 循环依赖处理时获取Early对象引用时被调用
 
 自动代理最核心的逻辑都在实例化前`AbstractAutoProxyCreator.postProcessBeforeInstantiation`以及初始化后`AbstractAutoProxyCreator.postProcessAfterInitialization`这两个方法中。
@@ -366,7 +397,7 @@ autoproxy的核心是`DefaultAdvisorAutoProxyCreator`，另外还有一个`BeanN
 
 `AspectJAwareAdvisorAutoProxyCreator`用于xml配置版的AspectJ切面自动代理创建(`<aop:config/>`)
 
-`AnnotationAwareAspectJAutoProxyCreator`用于基于注解的自动代理创建(`<aop:aspectj-autoproxy/>` 或 `@EnableAspectJAutoProxy`)
+`AnnotationAwareAspectJAutoProxyCreator`用于基于注解的自动代理创建(`<aop:aspectj-autoproxy/>` 或 `@EnableAspectJAutoProxy`)，下面对这个自动代理类进行较为详细的示例说明。
 
 #### 4. aspectj
 
@@ -682,6 +713,8 @@ else {
 
 #### ProxyFactory
 
+核心逻辑都在`ProxyFactory.getProxy()`方法中，底层其实跟`ProxyFactoryBean`是一样的
+
 ## 参考
 
 [Spring源码分析：AOP](https://blog.csdn.net/u014634338/article/details/83866311)
@@ -693,3 +726,5 @@ else {
 [TargetSource目标源](https://blog.csdn.net/shenchaohao12321/article/details/85538163)
 
 [Spring AOP的核心类：AbstractAdvisorAutoProxy自动代理创建器深度剖析（AnnotationAwareAspectJAutoProxyCreator）](https://cloud.tencent.com/developer/article/1497767)
+
+[Spring AOP中@Pointcut切入点表达式最全面使用介绍](https://blog.csdn.net/f641385712/article/details/83543270)
