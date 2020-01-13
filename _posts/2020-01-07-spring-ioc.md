@@ -26,19 +26,19 @@ IOC(Inversion Of Control)/DI(Dependence Injection)的目的是将对象交由容
 
 ```java
 public interface BeanFactory {
-	String FACTORY_BEAN_PREFIX = "&";
-	Object getBean(String name) throws BeansException;
-	<T> T getBean(String name, Class<T> requiredType) throws BeansException;
-	Object getBean(String name, Object... args) throws BeansException;
-	<T> T getBean(Class<T> requiredType) throws BeansException;
-	<T> T getBean(Class<T> requiredType, Object... args) throws BeansException;
-	boolean containsBean(String name);
-	boolean isSingleton(String name) throws NoSuchBeanDefinitionException;
-	boolean isPrototype(String name) throws NoSuchBeanDefinitionException;
-	boolean isTypeMatch(String name, ResolvableType typeToMatch) throws NoSuchBeanDefinitionException;
-	boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException;
-	Class<?> getType(String name) throws NoSuchBeanDefinitionException;
-	String[] getAliases(String name);
+    String FACTORY_BEAN_PREFIX = "&";
+    Object getBean(String name) throws BeansException;
+    <T> T getBean(String name, Class<T> requiredType) throws BeansException;
+    Object getBean(String name, Object... args) throws BeansException;
+    <T> T getBean(Class<T> requiredType) throws BeansException;
+    <T> T getBean(Class<T> requiredType, Object... args) throws BeansException;
+    boolean containsBean(String name);
+    boolean isSingleton(String name) throws NoSuchBeanDefinitionException;
+    boolean isPrototype(String name) throws NoSuchBeanDefinitionException;
+    boolean isTypeMatch(String name, ResolvableType typeToMatch) throws NoSuchBeanDefinitionException;
+    boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException;
+    Class<?> getType(String name) throws NoSuchBeanDefinitionException;
+    String[] getAliases(String name);
 }
 ```
 
@@ -267,6 +267,101 @@ ConfigurationClassPostProcessor#enhanceConfigurationClasses
 > 这三个类只能配合@Import使用，不能单独通过@Bean加载到容器，但是@Import可以独立使用导入普通的bean
 
 如果配置类加了@Import，在`ConfigurationClassParser#parse#doProcessConfigurationClass#processImports`中进行了处理，`DeferredImportSelector`、`ImportBeanDefinitionRegistrar`先保存在内存变量中，在后面的`ConfigurationClassParser#processDeferredImportSelectors`中最后才进行处理
+
+#### @Autowired
+
+```java
+AbstractApplicationContext.refresh
+AbstractApplicationContext.finishBeanFactoryInitialization
+DefaultListableBeanFactory.preInstantiateSingletons
+AbstractBeanFactory.getBean
+AbstractBeanFactory.doGetBean
+AbstractAutowireCapableBeanFactory.createBean
+AbstractAutowireCapableBeanFactory.doCreateBean
+AbstractAutowireCapableBeanFactory.createBeanInstance
+AbstractAutowireCapableBeanFactory.applyMergedBeanDefinitionPostProcessors
+//*********************************************************
+protected void applyMergedBeanDefinitionPostProcessors(RootBeanDefinition mbd, Class<?> beanType, String beanName) {
+    for (BeanPostProcessor bp : getBeanPostProcessors()) {
+        if (bp instanceof MergedBeanDefinitionPostProcessor) {
+            MergedBeanDefinitionPostProcessor bdp = (MergedBeanDefinitionPostProcessor) bp;
+            bdp.postProcessMergedBeanDefinition(mbd, beanType, beanName);
+        }
+    }
+}
+//*********************************************************
+```
+
+##### AutowiredAnnotationBeanPostProcessor
+
+```java
+public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
+    implements MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {}
+```
+
+AutowiredAnnotationBeanPostProcessor实现了MergedBeanDefinitionPostProcessor接口，postProcessMergedBeanDefinition()方法在上面的步骤里面被调用
+
+```java
+AutowiredAnnotationBeanPostProcessor.postProcessMergedBeanDefinition
+AutowiredAnnotationBeanPostProcessor.findAutowiringMetadata
+AutowiredAnnotationBeanPostProcessor.buildAutowiringMetadata
+//这里通过反射的方式遍历所有的filed和method，检查是否打了@Autowired、@Value标签
+//得到AutowiredFieldElement、AutowiredMethodElement的集合，最后都放入到LinkedList<InjectionMetadata.InjectedElement>链表里面
+ReflectionUtils.doWithLocalFields
+ReflectionUtils.doWithLocalMethods
+```
+
+**实际注入对象的时机**
+
+```java
+//回到AbstractAutowireCapableBeanFactory.populateBean
+AbstractAutowireCapableBeanFactory.populateBean
+//根据名称或者类型进行注入
+AutowiredAnnotationBeanPostProcessor.autowireByName
+AutowiredAnnotationBeanPostProcessor.autowireByType
+
+AbstractAutowireCapableBeanFactory.postProcessPropertyValues
+AutowiredAnnotationBeanPostProcessor.postProcessPropertyValues
+AutowiredAnnotationBeanPostProcessor.postProcessProperties
+//*********************************************************
+for (BeanPostProcessor bp : getBeanPostProcessors()) {
+    if (bp instanceof InstantiationAwareBeanPostProcessor) {
+        InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+        PropertyValues pvsToUse = ibp.postProcessProperties(pvs, bw.getWrappedInstance(), beanName);
+        if (pvsToUse == null) {
+            if (filteredPds == null) {
+                filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
+            }
+            //AutowiredAnnotationBeanPostProcessor是InstantiationAwareBeanPostProcessor的子类，所以postProcessPropertyValues方法会被调用
+            pvsToUse = ibp.postProcessPropertyValues(pvs, filteredPds, bw.getWrappedInstance(), beanName);
+            if (pvsToUse == null) {
+                return;
+            }
+        }
+        pvs = pvsToUse;
+    }
+}
+
+
+@Override
+public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
+    InjectionMetadata metadata = findAutowiringMetadata(beanName, bean.getClass(), pvs);
+    try {
+        metadata.inject(bean, beanName, pvs);
+    }
+    catch (BeanCreationException ex) {
+        throw ex;
+    }
+    catch (Throwable ex) {
+        throw new BeanCreationException(beanName, "Injection of autowired dependencies failed", ex);
+    }
+    return pvs;
+}
+//*********************************************************
+
+//通过InjectionMetadata.inject->InjectElement.inject
+//实际执行的是AutowiredFieldElement.inject和AutowiredMethodElement.inject
+```
 
 ## 参考
 
