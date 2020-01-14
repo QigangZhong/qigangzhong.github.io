@@ -32,7 +32,20 @@ spring中的事件发布-订阅机制依赖几个接口:
 
 * 4.**ApplicationEventPublisher**：spring的事件发布者接口，定义了发布事件的接口方法publishEvent。因为ApplicationContext实现了该接口，因此spring的ApplicationContext实例具有发布事件的功能(publishEvent方法在AbstractApplicationContext中有实现)。在使用的时候，只需要把ApplicationEventPublisher的引用定义到ApplicationEventPublisherAware的实现中，spring容器会完成对ApplicationEventPublisher的注入。
 
-## 示例
+springboot中新增事件机制：
+
+* **SpringApplicationRunListeners、SpringApplicationRunListener**：SpringApplicationRunListeners是SpringApplicationRunListener的简单封装，通过遍历调用每个监听器的方法
+
+  * **EventPublishingRunListener**：是SpringApplicationRunListener的唯一一个内置实现类，springboot启动时会默认加载进来，springboot利用EventPublishingRunListener间接调用spring中的ApplicationEvent
+
+  * **SimpleApplicationEventMulticaster**：EventPublishingRunListener利用这个广播器来广播事件
+  
+  * **SpringApplicationEvent**
+* 
+
+## ApplicationEvent
+
+### 示例
 
 使用springboot应用来做示例，pom依赖添加web依赖即可
 
@@ -147,5 +160,104 @@ public class EventDemoApplication {
 2邮件服务接到通知，给 zhangsan2 发送邮件...
 1邮件服务接到通知，给 zhangsan2 发送邮件...
 ```
+
+## SpringApplicationRunListener
+
+事件监听器在以下事件发生时会被调用：
+
+* 开始启动
+* Environment构建完成
+* ApplicationContext构建完成
+* ApplicationContext完成加载
+* ApplicationContext完成刷新并启动
+* 启动完成
+* 启动失败
+
+![SpringApplicationEvent.png](/images/spring/SpringApplicationEvent.png)
+
+### 示例
+
+自定义一个事件监听器
+
+```java
+public class MySpringApplicationRunListener implements SpringApplicationRunListener {
+    private final SpringApplication springApplication;
+    private final String[] args;
+
+    public MySpringApplicationRunListener(SpringApplication springApplication, String[] args){
+        this.springApplication = springApplication;
+        this.args = args;
+    }
+
+    @Override
+    public void starting() {
+        System.out.println("my starting");
+    }
+
+    @Override
+    public void environmentPrepared(ConfigurableEnvironment environment) {
+        System.out.println("my environmentPrepared");
+    }
+
+    @Override
+    public void contextPrepared(ConfigurableApplicationContext context) {
+        System.out.println("my contextPrepared");
+    }
+
+    @Override
+    public void contextLoaded(ConfigurableApplicationContext context) {
+        System.out.println("my contextLoaded");
+    }
+
+    @Override
+    public void started(ConfigurableApplicationContext context) {
+        System.out.println("my started");
+    }
+
+    @Override
+    public void running(ConfigurableApplicationContext context) {
+        System.out.println("my running");
+    }
+
+    @Override
+    public void failed(ConfigurableApplicationContext context, Throwable exception) {
+        System.out.println("my failed");
+    }
+}
+```
+
+配置到META-INF/spring.factories中
+
+```properties
+org.springframework.boot.SpringApplicationRunListener=com.qigang.sb.e.MySpringApplicationRunListener
+```
+
+一个普通的springboot启动类启动应用，观察输出日志
+
+```java
+@SpringBootApplication
+public class App {
+    public static void main(String[] args) {
+        SpringApplication.run(App.class,args);
+    }
+}
+```
+
+### EventPublishingRunListener
+
+EventPublishingRunListener是springboot中唯一一个SpringApplicationRunListener的实现类，默认会被加载，跟踪到EventPublishingRunListener的源码中可以看到，它其实是spring的事件ApplicationEvent的代理。
+
+如果在上面的示例中添加一个普通的ApplicationListener，监听springboot启动完成事件，也是可以的，当然如果你要监听的事件在自定义的事件监听器被加载到容器之前肯定不行的，比如你想监听springboot启动事件ApplicationStartingEvent，在这个事件发布的时候MyApplicationListener根本都还没有被加载到容器里面，所以onApplicationEvent方法也不可能被调用。
+
+```java
+@Component
+public class MyApplicationListener implements ApplicationListener<ApplicationReadyEvent> {
+    @Override
+    public void onApplicationEvent(ApplicationReadyEvent event) {
+        System.out.println("my onApplicationEvent");
+    }
+}
+```
+
 
 ## 参考

@@ -46,6 +46,7 @@ public ConfigurableApplicationContext run(String... args) {
     ConfigurableApplicationContext context = null;
     Collection<SpringBootExceptionReporter> exceptionReporters = new ArrayList<>();
     configureHeadlessProperty();
+    //获取事件监听器，在后续的特定节点中发布事件让监听器监听到，参考：https://qigangzhong.github.io/2019/12/17/spring-event/
     SpringApplicationRunListeners listeners = getRunListeners(args);
     listeners.starting();
     try {
@@ -85,6 +86,10 @@ public ConfigurableApplicationContext run(String... args) {
     return context;
 }
 ```
+
+### SpringApplicationRunListeners
+
+获取事件监听器，在后续的特定节点中发布事件让监听器监听到，参考：https://qigangzhong.github.io/2019/12/17/spring-event/
 
 ### prepareEnvironment
 
