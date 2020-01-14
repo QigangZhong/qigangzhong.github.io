@@ -87,9 +87,9 @@ public ConfigurableApplicationContext run(String... args) {
 }
 ```
 
-### SpringApplicationRunListeners
+### SpringApplicationRunListener
 
-获取事件监听器，在后续的特定节点中发布事件让监听器监听到，参考：https://qigangzhong.github.io/2019/12/17/spring-event/
+获取事件监听器，在后续的特定节点中发布事件让监听器监听到，参考：[SpringApplicationRunListener](https://qigangzhong.github.io/2019/12/17/spring-event/#springapplicationrunlistener)
 
 ### prepareEnvironment
 
