@@ -114,4 +114,6 @@ environment有三种类型
 * StandardEnvironment
 * StandardReactiveWebEnvironment
 
+![Environment.png](/images/spring/Environment.png)
+
 ## 参考
