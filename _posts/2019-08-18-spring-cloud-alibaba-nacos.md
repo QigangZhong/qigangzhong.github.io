@@ -85,6 +85,35 @@ sh startup-8843.sh
 
 最后对集群的所有节点通过nginx等方式来做负载均衡就可以了，在springcloud的应用中使用统一的配置中心的地址就好。
 
+#### 密码修改
+
+通过代码的方式生成新密码，更新nacons_config.user密码信息
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+```
+
+```java
+String rawPwd = "nacos";
+
+//根据明文密码生成密文
+BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+String pwd = encoder.encode(rawPwd);
+System.out.println(pwd);
+
+//每次生成的密文都不一样，用matches方法判断密文是否匹配明文
+boolean match = encoder.matches(rawPwd,pwd);
+System.out.println(match);
+```
+
+```sql
+use nacos_config;
+update users set password = '$2a$10$hdcmYyrqfH.0EaMloegpzesoV1xWVH5Cs9QOuk1r0bRec/I7jV16W' where username = 'nacos';
+```
+
 ### nacos作为注册中心的代码示例
 
 [代码示例](https://gitee.com/qigangzhong/springcloud.alibaba/tree/master/springcloud.alibaba.nacos)
