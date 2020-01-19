@@ -76,6 +76,8 @@ AbstractAutowireCapableBeanFactory.populateBean
 
 ### 本地配置文件刷新
 
+#### 使用定时器自动刷新PropertySource
+
 
 
 ## 参考
