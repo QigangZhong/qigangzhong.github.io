@@ -1,8 +1,8 @@
 ---
 layout: post
 title:  "springboot启动流程"
-categories: spring
-tags: spring
+categories: springboot
+tags: springboot
 author: 网络
 ---
 
