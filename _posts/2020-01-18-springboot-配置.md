@@ -76,9 +76,89 @@ AbstractAutowireCapableBeanFactory.populateBean
 
 ### 本地配置文件刷新
 
-#### 使用定时器自动刷新PropertySource
+#### 1. 使用定时器自动刷新PropertySource
 
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+```
 
+```java
+@Component
+public class PropertyLoader {
+
+    @Autowired
+    private StandardEnvironment environment;
+
+    @Scheduled(fixedRate=1000)
+    public void reload() throws IOException {
+        MutablePropertySources propertySources = environment.getPropertySources();
+        String propertiesFilePropertySoureName = "applicationConfig: [classpath:/application.properties]";
+        Properties properties = new Properties();
+        InputStream inputStream = getClass().getResourceAsStream("/application.properties");
+        properties.load(inputStream);
+        inputStream.close();
+        propertySources.replace(propertiesFilePropertySoureName, new PropertiesPropertySource(propertiesFilePropertySoureName, properties));
+    }
+}
+```
+
+```java
+@SpringBootApplication
+@EnableScheduling
+@PropertySource("classpath:/application.properties")
+public class MainApp  {
+    public static void main(String[] args) {
+        SpringApplication.run(MainApp.class, args);
+    }
+}
+```
+
+```java
+@RestController
+public class DemoController {
+    @Autowired
+    private StandardEnvironment environment;
+
+    @Value("${demo.name}")
+    private String name;
+
+    @GetMapping("/getNameFromEnvironment")
+    public String getNameFromEnvironment(){
+        return environment.getProperty("demo.name");
+    }
+
+    /**
+     * 配置文件修改后这个方式无法获取到最新的配置值
+     * 因为@Value的字段值是在spring容器启动的时候注入，通过刷新PropertySource的方式无法重新注入值
+     * @return
+     */
+    @GetMapping("/getNameFromValue")
+    public String getNameFromValue(){
+        return name;
+    }
+}
+```
+
+这种方式有一个缺点就是，无法使用@Value的方式获取配置值，因为@Value的字段值注入之后并不会被刷新，只能通过`environment.getProperty("key")`的方式。
+
+[示例代码](https://gitee.com/qigangzhong/springboot-demo/tree/master/config/config-refresh)
+
+#### 2. EnvironmentPostProcessor
+
+[示例代码](https://gitee.com/qigangzhong/share.demo/tree/master/environment-post-processor-demo)
+
+#### 3. PropertySourceLocator
+
+[示例代码](https://gitee.com/qigangzhong/share.demo/tree/master/property-source-locator-demo)
+
+#### 4. Archaius PolledConfigurationSource
+
+[示例代码](https://gitee.com/qigangzhong/share.demo/tree/master/springboot-archaius-demo)
+
+#### 
 
 ## 参考
 
