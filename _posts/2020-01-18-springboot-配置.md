@@ -158,7 +158,9 @@ public class DemoController {
 
 [示例代码](https://gitee.com/qigangzhong/share.demo/tree/master/springboot-archaius-demo)
 
-#### 
+#### 5. 类似appolo的方式，反射@Value字段并定时更新值
+
+[Apollo 2 如何支持 @Value 注解自动更新](https://www.jianshu.com/p/502bc54f86c1)
 
 ## 参考
 

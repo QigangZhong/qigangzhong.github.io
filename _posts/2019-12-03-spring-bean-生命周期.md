@@ -262,7 +262,7 @@ public class BeanFactoryLifeCycleMain {
 
 BeanFactory的Bean生命周期执行步骤如下：
 
-![BeanFactory-BeanLifecycle](https://img-blog.csdn.net/20180802223029954?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTIzODUxOTA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![BeanFactory-BeanLifecycle](/images/spring/spring-bean-lifecycle.jpg)
 
 ## 三、关于BeanFactory的Bean生命周期接口的总结
 
