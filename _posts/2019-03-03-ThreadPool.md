@@ -239,6 +239,21 @@ for(int i=0;i<4;i++)
     //延迟三秒执行
     newScheduledThreadPool.schedule(new FourThreadPoolsRunnableImpl(index),3, TimeUnit.SECONDS);
 }
+// dubbo的延迟暴露服务特性就是通过这种方式来实现的
+//**************************************************************************************************************
+private static final ScheduledExecutorService delayExportExecutor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("DubboServiceDelayExporter", true));
+if (delay != null && delay > 0) {
+    delayExportExecutor.schedule(new Runnable() {
+        public void run() {
+            doExport();
+        }
+    }, delay, TimeUnit.MILLISECONDS);
+} else {
+    doExport();
+}
+//**************************************************************************************************************
+
+    
 
 
 //4. 创建一个单线程化的线程池，它只会用唯一的工作线程来执行任务，保证所有任务按照指定顺序(FIFO, LIFO, 优先级)执行，corePoolSize和maximumPoolSize都被设置为1
