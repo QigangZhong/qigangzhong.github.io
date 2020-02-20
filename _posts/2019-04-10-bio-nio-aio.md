@@ -229,6 +229,7 @@ public class TimeServerHandlerPool {
 
 > Java NIO（ New IO） 是从Java 1.4版本开始引入的一个新的IO API，可以替代标准的Java IO API。NIO与原来的IO有同样的作用和目的，但是使用的方式完全不同， NIO支持面向缓冲区的、基于通道的IO操作。 NIO将以更加高效的方式进行文件的读写操作。
 
+
 NIO与普通IO的主要区别:
 
 | IO                      | NIO                         |
@@ -486,6 +487,10 @@ class PipTask implements Runnable {
     }
 }
 ```
+
+### 零拷贝，直接内存映射
+
+[NIO效率高的原理之零拷贝与直接内存映射](https://mp.weixin.qq.com/s?__biz=MzUyNzgyNzAwNg==&mid=2247483933&idx=1&sn=d9776b9efe054b30523adbe60cb7524a&scene=21#wechat_redirect)
 
 ## 三、AIO
 
