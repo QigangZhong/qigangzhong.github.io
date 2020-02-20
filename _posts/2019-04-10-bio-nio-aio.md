@@ -225,6 +225,8 @@ public class TimeServerHandlerPool {
 
 ## 二、NIO
 
+### 概念
+
 > Java NIO（ New IO） 是从Java 1.4版本开始引入的一个新的IO API，可以替代标准的Java IO API。NIO与原来的IO有同样的作用和目的，但是使用的方式完全不同， NIO支持面向缓冲区的、基于通道的IO操作。 NIO将以更加高效的方式进行文件的读写操作。
 
 NIO与普通IO的主要区别:
@@ -371,11 +373,12 @@ Buffer提供的方法：
 
 * mark()
 * reset()
+  
    > 标记Buffer中的一个特定position。之后可以通过调用Buffer.reset()方法恢复到这个position。
 
 ### 2.3 Selector
 
-> Selector多路复用器提供选择已就绪的任务的能力，Selector会不断轮询注册在其上的Channel，如果某个Channel发生读或写操作，这个Channel就会处于就绪状态，会被Selector轮询出来，通过SelectionKey可以获取就绪的Channel进行后续IO操作。JDK NIO使用epoll替代select/poll，基于事件驱动而不是轮询所有fd状态，且没有最大连接句柄限制(select在32位机器上限制1024，64位机器上限制2048，poll基于链表存储也没有限制)，可以处理成千上万个客户端(1G内存可以处理10w)。
+> Selector多路复用器提供选择已就绪的任务的能力，Selector会不断轮询注册在其上的Channel，如果某个Channel发生读或写操作，这个Channel就会处于就绪状态，会被Selector轮询出来，通过SelectionKey可以获取就绪的Channel进行后续IO操作。JDK NIO使用epoll替代select/poll，基于事件驱动而不是轮询所有fd状态(时间复杂度O(1))，且没有最大连接句柄限制(select在32位机器上限制1024，64位机器上限制2048，poll基于链表存储也没有限制，但是poll跟select一样需要轮询channel，时间复杂度是O(n))，可以处理成千上万个客户端(1G内存可以处理10w)。
 
 ![nio_selector模型.png](/images/io/nio_selector模型.png)
 
@@ -399,7 +402,7 @@ SelectionKey.OP_READ | SelectionKey.OP_WRITE
 
 Selector方法：
 * int select()  //阻塞到至少有一个通道在你注册的事件上就绪了，可以通过wakeUp()方法唤醒
-* int select(long timeout)  //阻塞知道超时
+* int select(long timeout)  //阻塞直到超时
 * int selectNow()  //不阻塞，直接返回就绪通道数量
 
 Selector示例：
@@ -938,6 +941,89 @@ public class ReadHandler implements CompletionHandler<Integer, ByteBuffer> {
 | 吞吐量         | 低         | 中                   | 高                           | 高                                |
 {: .table.table-bordered }
 
+## 4.1 同步、异步/阻塞、非阻塞
+
+### 针对IO而言
+
+IO的操作分为两个阶段，①等待数据阶段、②将数据从内核复制到用户空间阶段，不同类型的IO操作在这两个阶段的区别如下图：
+
+![5个IO模型比较.png](/images/io/5个IO模型比较.png)
+
+* 阻塞IO：指用户进程在等待IO准备数据的过程中是需要Block住的(recvfrom的参数flags=0会默认保持等待)，例如BIO，应用程序在获取到指定字节的数据之前是Block住的。
+![阻塞IO.png](/images/io/阻塞IO.png)
+* 非阻塞IO：指用户进程在等待IO准备数据的过程中不是采取Block的方式，而是隔一段时间去检测IO缓冲区是否有数据，如果有则读取，如果没有也会立刻返回(通过recvfrom的flags参数控制，flags=MSG_DONTWAIT表示立即返回不等待)。但是在数据从内核缓冲区复制到用户空间的阶段跟阻塞IO一样，还是会Block。
+![非阻塞IO.png](/images/io/非阻塞IO.png)
+* 同步IO：用户进程和内核IO进程需要完全或者部分阶段保持步调一致，如图中前4种类型的IO，在IO第二阶段用户进程全部都要通过阻塞的方式来与内核IO操作保持步调一致，用户进程阻塞是保持同步的一种手段
+* 异步IO：用户进程和内核IO进程的操作完全平行，内核在IO操作结束之后通过信号或回调函数的方式通知用户进程，如图中的第5种IO。
+
+阻塞是实现同步的一种手段，如果以linux的socket而言(windows的socket函数非常类似，也有flags参数)，最终的实现方式是通过接收数据和发送数据函数实现的，flags参数可以控制是否需要则塞，默认是阻塞的：
+
+```c
+#include <sys/types.h>
+#include <sys/socket.h>
+ssize_t recv(int sockfd, void *buff, size_t nbytes, int flags);
+ssize_t recvfrom(int sock, void *buf, size_t len, int flags, truct sockaddr *from, socklen_t *fromlen);
+ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
+
+ssize_t send(int sockfd, const void *buff, size_t nbytes, int flags);
+int sendto(int s, const void *msg, int len, unsigned int flags, const 
+struct sockaddr *to , int tolen);
+```
+
+除去这4种IO，第一张图里面还有另外两个IO模型：
+
+* IO复用模型(select/poll/epoll)：它也是一种同步非则塞模型(阻塞于select/poll函数，同时监听多个fs，但是没有阻塞于内核socket的recv函数)，
+  ![IO复用.png](/images/io/IO复用.png)
+
+  > * (1) select==>时间复杂度O(n)
+  >
+  > 它仅仅知道了，有I/O事件发生了，却并不知道是哪几个流（可能有一个，多个，甚至全部），我们只能无差别轮询所有流，找出能读出数据，或者写入数据的流，对他们进行操作。所以**select具有O(n)的无差别轮询复杂度**，同时处理的流越多，无差别轮询时间就越长。
+  >
+  > * (2) poll==>时间复杂度O(n)
+  >
+  > poll本质上和select没有区别，它将用户传入的数组拷贝到内核空间，然后查询每个fd对应的设备状态， **但是它没有最大连接数的限制**，原因是它是基于链表来存储的.
+  >
+  > * (3) epoll==>时间复杂度O(1)
+  >
+  > **epoll可以理解为event poll**，不同于忙轮询和无差别轮询，epoll会把哪个流发生了怎样的I/O事件通知我们。所以我们说epoll实际上是**事件驱动（每个事件关联上fd）**的，此时我们对这些流的操作都是有意义的。**（复杂度降低到了O(1)）**
+  >
+
+  >
+  > select，poll，epoll都是IO多路复用的机制。I/O多路复用就通过一种机制，可以监视多个描述符，一旦某个描述符就绪（一般是读就绪或者写就绪），能够通知程序进行相应的读写操作。**但select，poll，epoll本质上都是同步I/O，因为他们都需要在读写事件就绪后自己负责进行读写，也就是说这个读写过程是阻塞的**，而异步I/O则无需自己负责进行读写，异步I/O的实现会负责把数据从内核拷贝到用户空间。  
+  >
+  > epoll跟select都能提供多路I/O复用的解决方案。在现在的Linux内核里有都能够支持，其中**epoll是Linux所特有**，而select则应该是POSIX所规定，一般操作系统均有实现
+  
+* 信号驱动IO模型
+![信号驱动IO.png](/images/io/信号驱动IO.png)
+
+### 针对线程而言
+
+* 线程同步：多个线程在访问临界资源的时候协调一致，同一时间只有一个线程获取临界资源，其它线程等待，目的是保证临界资源的安全，但效率较低
+
+  > java中实现线程同步的方式有：
+  >
+  > * ThreadLocal
+  > * synchronized
+  > * wait()、notify()
+  > * volatile
+
+* 线程异步：多个线程可以同时访问临界资源，临界资源不安全
+
+* 线程阻塞：某个线程在等待调用结果或者等待某个资源的时候挂起就是阻塞
+
+* 线程非阻塞：与上面相反
+
+### 针对远程调用而言
+
+* 同步调用：客户端等待调用结果之后才返回
+* 异步调用：客户端不等待调用结果直接返回，通过回调函数来接收返回信息
+
+### 针对通信而言
+
+### 使用场景
+
+
+
 ## 参考
 
 [Java NIO 系列教程](http://ifeve.com/java-nio-all/)
@@ -949,3 +1035,9 @@ public class ReadHandler implements CompletionHandler<Integer, ByteBuffer> {
 [Netty权威指南（第二版）源码](https://github.com/wuyinxian124/nettybook2)
 
 [io-demo](https://gitee.com/qigangzhong/java-basics/tree/master/io-demo)
+
+[彻底理解同步 异步 阻塞 非阻塞](https://www.cnblogs.com/loveer/p/11479249.html)
+
+[*****简述同步IO、异步IO、阻塞IO、非阻塞IO之间的联系与区别](https://www.cnblogs.com/felixzh/p/10345929.html)
+
+[*****select、poll、epoll之间的区别](https://www.cnblogs.com/aspirant/p/9166944.html)
