@@ -25,14 +25,16 @@ author: 网络
 
 ### 1. CAS及ABA
 
-> * CAS原理
->
-> CAS(compare and swap)包含3个参数CAS(V,E,N).V表示要更新的变量, E表示预期值, N表示新值.  
-> 仅当V值等于E值时, 才会将V的值设为N, 如果V值和E值不同, 则说明已经有其他线程做了更新, 则当前线程什么都不做. 最后, CAS返回当前V的真实值. CAS操作是抱着乐观的态度进行的, 它总是认为自己可以成功完成操作.当多个线程同时使用CAS操作一个变量时, 只有一个会胜出, 并成功更新, 其余均会失败.失败的线程不会被挂起,仅是被告知失败, 并且允许再次尝试, 当然也允许失败的线程放弃操作.基于这样的原理, CAS操作即时没有锁,也可以发现其他线程对当前线程的干扰, 并进行恰当的处理.
->
-> * ABA问题
->
-> 线程一准备用CAS将变量的值由A替换为B, 在此之前线程二将变量的值由A替换为C, 线程三又将C替换为A, 然后线程一执行CAS时发现变量的值仍然为A, 所以线程一CAS成功
+* CAS原理
+
+CAS(compare and swap)包含3个参数CAS(V,E,N).V表示当前内存值, E表示旧的预期值, N表示新值.  
+仅当V值等于E值时, 才会将V的值设为N, 如果V值和E值不同, 则说明已经有其他线程做了更新, 则当前线程什么都不做. 最后, CAS返回当前V的真实值. CAS操作是抱着乐观的态度进行的, 它总是认为自己可以成功完成操作.当多个线程同时使用CAS操作一个变量时, 只有一个会胜出, 并成功更新, 其余均会失败.失败的线程不会被挂起,仅是被告知失败, 并且允许再次尝试, 当然也允许失败的线程放弃操作.基于这样的原理, CAS操作即时没有锁,也可以发现其他线程对当前线程的干扰, 并进行恰当的处理.
+
+* ABA问题
+
+线程一准备用CAS将变量的值由A替换为B, 在此之前线程二将变量的值由A替换为C, 线程三又将C替换为A, 然后线程一执行CAS时发现变量的值仍然为A, 所以线程一CAS成功
+
+在java中ABA问题的解决办法是加版本号（类似于时间戳），实现类为：[AtomicStampedReference、AtomicMarkableReference](https://gitee.com/qigangzhong/java-basics/tree/master/cas/src/main/java/com/qigang/cas)
 
 ### 2. Unsafe
 
@@ -168,7 +170,7 @@ public class AtomicReferenceTest {
 }
 ```
 
-#### AtomicStampedReference示例
+#### AtomicStampedReference示例(解决ABA问题)
 
 ```java
 public class AtomicStampedReferenceDemo {
@@ -317,3 +319,7 @@ class Person {
 [*****Java 里面有sizeof，计算内存占用的方法么](https://www.jianshu.com/p/b925b5b5610e?from=timeline&isappinstalled=0)
 
 [github开源项目: ehcache-sizeof](https://github.com/ehcache/sizeof)
+
+[Java中的CAS和Unsafe类](https://www.jianshu.com/p/df0585b61773)
+
+[Java解决CAS机制中ABA问题的方案](https://blog.csdn.net/u011277123/article/details/90699619)
