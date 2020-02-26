@@ -381,6 +381,8 @@ Buffer提供的方法：
 
 > Selector多路复用器提供选择已就绪的任务的能力，Selector会不断轮询注册在其上的Channel，如果某个Channel发生读或写操作，这个Channel就会处于就绪状态，会被Selector轮询出来，通过SelectionKey可以获取就绪的Channel进行后续IO操作。JDK NIO使用epoll替代select/poll，基于事件驱动而不是轮询所有fd状态(时间复杂度O(1))，且没有最大连接句柄限制(select在32位机器上限制1024，64位机器上限制2048，poll基于链表存储也没有限制，但是poll跟select一样需要轮询channel，时间复杂度是O(n))，可以处理成千上万个客户端(1G内存可以处理10w)。
 
+> select，poll，epoll都是IO多路复用的机制，I/O多路复用就是通过一种机制，可以监视多个描述符，一旦某个描述符就绪（一般是读就绪或者写就绪），能够通知应用程序进行相应的读写操作。但select，poll，epoll本质上都是同步I/O，因为他们都需要在读写事件就绪后自己负责进行读写，也就是说这个读写过程是阻塞的，而异步I/O则无需自己负责进行读写，异步I/O的实现会负责把数据从内核拷贝到用户空间。
+
 ![nio_selector模型.png](/images/io/nio_selector模型.png)
 
 创建Selector：
