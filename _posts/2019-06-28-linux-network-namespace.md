@@ -307,3 +307,5 @@ ok，运行良好。
 ## 参考
 
 [原文链接--linux network namespace 学习](https://segmentfault.com/a/1190000004059167)
+
+[*****Linux工具快速教程](https://linuxtools-rst.readthedocs.io/zh_CN/latest/)

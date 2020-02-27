@@ -240,3 +240,5 @@ tar -zxvf target.tar
 [linux命令大全](https://www.runoob.com/linux/linux-command-manual.html)
 
 [xargs命令教程](http://www.ruanyifeng.com/blog/2019/08/xargs-tutorial.html)
+
+[*****Linux工具快速教程](https://linuxtools-rst.readthedocs.io/zh_CN/latest/)
