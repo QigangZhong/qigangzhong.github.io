@@ -289,6 +289,10 @@ zkSerializer，自定义序列化实现
 
 ### zk的watch机制
 
+zk客户端向zk服务器注册watcher的同时，会将watcher对象存储在客户端的watchManager。zk服务器触发watcher事件后，会向客户端发送通知，客户端线程从watchManager中回调watcher执行相应的功能。
+
+watcher只能监听子节点，不能监听到孙节点。watcher设置后，一旦触发一次后就会失效，如果要想一直监听，需要在process回调函数里重新注册相同的 watcher
+
 - 通知类似于数据库中的触发器, 对某个Znode设置 `Watcher`, 当Znode发生变化的时候, `WatchManager`会调用对应的`Watcher`
 - 当Znode发生删除, 修改, 创建, 子节点修改的时候, 对应的`Watcher`会得到通知
 - `Watcher`的特点
@@ -305,7 +309,15 @@ zkSerializer，自定义序列化实现
 | Disconnected  | None             | 客户端和服务端断开连接   | 此时客户端和服务器处于断开连接状态 |
 | Expired       | None             | 会话超时                 | 会收到一个SessionExpiredException  |
 | AuthFailed    | None             | 权限验证失败             | 会收到一个AuthFailedException      |
+{: .table.table-bordered }
 
+### ACL权限控制
+
+[zookeeper的ACL权限控制](https://www.cnblogs.com/qlqwjy/p/10517231.html)
+
+### ZAB协议
+
+[ZAB协议，消息广播，崩溃恢复，数据同步](https://blog.csdn.net/u013679744/article/details/79240249)
 
 ### zk的leader选举机制
 
@@ -372,6 +384,9 @@ watcher机制，数据的推拉结合，配置中心的功能就是基于这个�
 ![zk_config_management.git](/images/zk/zk_config_management.gif)
 
 ### 分布式锁实现原理
+
+Curator组件的内置加锁功能实现方式：
+[彻底讲清楚ZooKeeper分布式锁的实现原理](http://www.imooc.com/article/284956?block_id=tuijian_wz)
 
 ![zk_lock.gif](/images/zk/zk_lock.gif)
 

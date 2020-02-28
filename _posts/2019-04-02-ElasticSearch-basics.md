@@ -23,6 +23,8 @@ author: 刚子
 
 ## 一、简易教程
 
+### 概念
+
 ### 1. 下载安装
 
 下载[安装文件](https://www.elastic.co/downloads/past-releases/elasticsearch-5-5-3)到`/opt/elasticsearch`目录下面并解压
@@ -80,6 +82,8 @@ vm.max_map_count=655360
 curl -X PUT 'http://localhost:9200/weather'
 curl -X DELETE 'http://localhost:9200/weather'
 ```
+
+> 一个索引可以有多个分片来完成存储，但是主分片的数量是在索引创建时就指定好的，且无法修改，所以尽量不要只为数据存储建立一个索引，否则后面数据膨胀时就无法调整了。笔者的建议是对于同一类型的数据，根据时间来分拆索引，比如一周建一个索引，具体取决于数据增长速度。
 
 ### 4. 添加文档
 
@@ -872,8 +876,46 @@ POST synonymtest/_analyze
 
 [Java API](https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/index.html)
 
+## 问题
+
+* translog是什么？
+
+[elasticsearch 事务日志translog](https://www.cnblogs.com/fengda/p/10348606.html)
+
+* match、match_phrase、term、bool区别
+
+[Elasticsearch查询match、term和bool区别](https://www.cnblogs.com/fengda/p/10348616.html)
+
+* keyword、text区别
+
+[elasticsearch的keyword与text的区别](https://www.cnblogs.com/fengda/p/10348607.html)
+
+* segment是什么？
+
+* 创建doc的过程
+
+协调节点hash取模`shard = hash(document_id) % (num_of_primary_shards)`，确定在哪个分片，分片所在节点写入Memory Buffer，默认1秒refresh一次到Filesystem Cache，写入translog，flush到磁盘（30分钟一次，或translog大于512M）。flush之后新的translog被创建老的删除，MemoryBuffer写入新segment然后清空，写入新的提交点。
+
+* 删除/更新doc的过程
+
+ES中的doc是不可变的，删除是在磁盘上segment对应的.del文件中做标记，更新一样，只是把老的version的doc标记删除，查询的时候标记删除的记录依然可以匹配查询，但是会被过滤掉。在
+
+* 搜索的过程
+
+* ES是如何做master选举的？集群脑裂怎么解决？
+
+ZenDiscovery模块，nodeId排序，达到n/2+1
+
+* 如何保证并发读写一致？
+
+乐观锁版本号
+
+对于读操作，可以设置replication为sync(默认)，这使得操作在主分片和副本分片都完成后才会返回；如果设置replication为async时，也可以通过设置搜索请求参数_preference为primary来查询主分片，确保文档是最新版本。
+
 ## 参考
 
 [ElasticSearch权威指南](https://www.elastic.co/guide/cn/elasticsearch/guide/current/index.html)
 
 [ElasticSearch-IK拓展自定义词库（2）：HTTP请求动态热词内容方式](https://my.oschina.net/jsonyang/blog/1782832)
+
+[ES常见问题](https://www.cnblogs.com/heqiyoujing/p/11146178.html)
