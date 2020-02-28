@@ -494,6 +494,27 @@ class PipTask implements Runnable {
 
 [NIO效率高的原理之零拷贝与直接内存映射](https://mp.weixin.qq.com/s?__biz=MzUyNzgyNzAwNg==&mid=2247483933&idx=1&sn=d9776b9efe054b30523adbe60cb7524a&scene=21#wechat_redirect)
 
+[关于零拷贝的一些理解](https://www.cnblogs.com/lhh-north/p/11031821.html)
+
+* CPU copy
+* DMA copy
+* sendFile  java transferTo
+* mmap  java MappedByteBuffer
+
+1. 磁盘文件不需要操作直接发送出去使用transferTo
+
+NIO的零拷贝由transferTo()方法实现。transferTo()方法将数据从FileChannel对象传送到可写的字节通道（如Socket Channel等）。在内部实现中，由native方法transferTo0()来实现，它依赖底层操作系统的支持。在UNIX和Linux系统中，调用这个方法将会引起sendfile()系统调用。
+
+2. 需要操作文件的情况，使用直接内存mmap
+
+NIO的直接内存是由MappedByteBuffer实现的。核心即是map()方法，该方法把文件映射到内存中，获得内存地址addr，然后通过这个addr构造MappedByteBuffer类，以暴露各种文件操作API。
+
+由于MappedByteBuffer申请的是堆外内存，因此不受Minor GC控制，只能在发生Full GC时才能被回收。而DirectByteBuffer改善了这一情况，它是MappedByteBuffer类的子类，同时它实现了DirectBuffer接口，维护一个Cleaner对象来完成内存回收。因此它既可以通过Full GC来回收内存，也可以调用clean()方法来进行回收。
+
+另外，直接内存的大小可通过jvm参数来设置：-XX:MaxDirectMemorySize。
+
+NIO的MappedByteBuffer还有一个兄弟叫做HeapByteBuffer。顾名思义，它用来在堆中申请内存，本质是一个数组。由于它位于堆中，因此可受GC管控，易于回收。
+
 ## 三、AIO
 
 > NIO 2.0引入了新的异步通道的概念，提供了异步文件通道（AsynchronousFileChannel）和异步套接字通道（AsynchronousServerSocketChannel）的实现。可以通过两种方式来获取异步操作的结果，Future或CompletionHandler。AIO是真正的异步非阻塞IO，不需要Selector来对注册通道进行轮询操作实现读写，简化了NIO编程模型。
