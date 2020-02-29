@@ -658,3 +658,5 @@ zuul.sensitive-headers=空白，对所有的服务都放行
 [spring-cloud-zuul-ratelimit](https://github.com/marcosbarbero/spring-cloud-zuul-ratelimit)
 
 [Rate Limiting in Spring Cloud Netflix Zuul](https://www.baeldung.com/spring-cloud-zuul-rate-limit)
+
+[Spring Cloud底层原理](http://www.imooc.com/article/283843)

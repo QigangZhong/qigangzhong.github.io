@@ -94,3 +94,5 @@ http://localhost:9411
 [服务链路追踪(Spring Cloud Sleuth)(Finchley版本)](https://blog.csdn.net/forezp/article/details/81041078)
 
 [分布式链路跟踪 Sleuth 与 Zipkin【Finchley 版】](https://windmt.com/2018/04/24/spring-cloud-12-sleuth-zipkin/)
+
+[Spring Cloud底层原理](http://www.imooc.com/article/283843)

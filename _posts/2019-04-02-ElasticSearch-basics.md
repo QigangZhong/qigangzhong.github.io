@@ -906,6 +906,18 @@ ES中的doc是不可变的，删除是在磁盘上segment对应的.del文件中�
 
 ZenDiscovery模块，nodeId排序，达到n/2+1
 
+通过最少master候选节点配置来解决脑裂问题，集群最少3个节点
+
+```json
+PUT /_cluster/settings
+{
+    "persistent" : {
+        "discovery.zen.minimum_master_nodes" : 2
+    }
+}
+
+```
+
 * 如何保证并发读写一致？
 
 乐观锁版本号
@@ -919,3 +931,5 @@ ZenDiscovery模块，nodeId排序，达到n/2+1
 [ElasticSearch-IK拓展自定义词库（2）：HTTP请求动态热词内容方式](https://my.oschina.net/jsonyang/blog/1782832)
 
 [ES常见问题](https://www.cnblogs.com/heqiyoujing/p/11146178.html)
+
+[ElasticSearch是什么？](https://yuzhouwan.com/posts/22654/)

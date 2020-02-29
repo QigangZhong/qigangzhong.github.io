@@ -309,6 +309,10 @@ public class CustomRibbonConfig {
 }
 ```
 
+## 问题
+
+1. 
+
 ## 参考
 
 [springcloud官网](https://spring.io/projects/spring-cloud)
@@ -324,3 +328,7 @@ public class CustomRibbonConfig {
 [服务消费者（rest+ribbon）(Finchley版本)](https://blog.csdn.net/forezp/article/details/81040946)
 
 [服务消费者（Feign）(Finchley版本)](https://blog.csdn.net/forezp/article/details/81040965)
+
+[Spring Cloud底层原理](http://www.imooc.com/article/283843)
+
+[【一起学源码-微服务】Eureka+Ribbon+Feign阶段性总结](https://www.cnblogs.com/wang-meng/p/12186024.html)

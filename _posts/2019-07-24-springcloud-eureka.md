@@ -205,6 +205,12 @@ server.port=8861
 eureka.client.service-url.defaultZone=http://localhost:8761/eureka/,http://localhost:8762/eureka/,http://localhost:8763/eureka/
 ```
 
+## 问题
+
+1. 心跳机制是如何实现的？
+
+
+
 ## 参考
 
 [springcloud官网](https://spring.io/projects/spring-cloud)
@@ -216,3 +222,9 @@ eureka.client.service-url.defaultZone=http://localhost:8761/eureka/,http://local
 [服务的注册与发现Eureka(Finchley版本)](https://blog.csdn.net/forezp/article/details/81040925)
 
 [搭建Spring Cloud Eureka 三个节点高可用集群](https://blog.csdn.net/huanxianglove/article/details/80690130)
+
+[Spring Cloud底层原理](http://www.imooc.com/article/283843)
+
+[Eureka与ZooKeeper对比，Eureka的优势](https://blog.csdn.net/vtopqx/article/details/81537004)
+
+[Eureka源码解析(三)—服务续约(心跳)](https://blog.csdn.net/yuu1009/article/details/80778928?depth_1-utm_source=distribute.pc_relevant.none-task&utm_source=distribute.pc_relevant.none-task)

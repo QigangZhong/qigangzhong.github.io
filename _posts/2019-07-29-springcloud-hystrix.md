@@ -32,6 +32,14 @@ feign.hystrix.enabled=true
 
 [示例代码](https://gitee.com/qigangzhong/springcloud.f/tree/master/springcloud.f.hystrix)
 
+hystrix主要提供以下几个功能：
+
+* 对依赖服务调用时出现的调用延迟和调用失败进行控制和容错保护
+* 在复杂的分布式系统中，阻止某一个依赖服务的故障在整个系统中蔓延，服务A->服务B->服务C，服务C故障了，服务B也故障了，服务A故障了，整套分布式系统全部故障，整体宕机
+* 提供fail-fast（快速失败）和快速恢复的支持
+* 提供fallback优雅降级的支持
+* 支持近实时的监控、报警以及运维操作
+
 ## feign+hystrix进行客户端熔断
 
 ### 服务端
@@ -363,6 +371,10 @@ http://localhost:8861/hi?name=zhangsan
 
 http://localhost:8862/hello?name=lisi
 
+## 隔离策略(线程池隔离vs信号量隔离)
+
+[Hystrix 服务的隔离策略对比，信号量与线程池隔离的差异](https://my.oschina.net/u/867417/blog/2120713)
+
 ## hystrix监控数据持久化
 
 hystrix+InfluxDB+grafana
@@ -390,3 +402,11 @@ hystrix+InfluxDB+grafana
 [Turbine(Finchley版本)](https://www.fangzhipeng.com/springcloud/2018/08/13/sc-f13-turbine.html)
 
 [fallback & fallbackFactory](https://www.jianshu.com/p/3d804e99e613)
+
+[Spring Cloud底层原理](http://www.imooc.com/article/283843)
+
+[【一起学源码-微服务】Hystrix 源码](https://www.cnblogs.com/wang-meng/p/12195475.html)
+
+[白话：服务降级与熔断的区别](https://segmentfault.com/a/1190000012137439)
+
+[Spring Cloud构建微服务架构：服务容错保护（Hystrix断路器）【Dalston版】](http://blog.didispace.com/spring-cloud-starter-dalston-4-3/)
