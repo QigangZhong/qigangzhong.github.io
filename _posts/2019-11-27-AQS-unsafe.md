@@ -87,7 +87,15 @@ public class Park_Unpark {
 }
 ```
 
-## 二、ReentrantLock、ReentrantReadWriteLock、CountDownLatch、CyclicBarrier、Semaphor
+## 二、AbstractQueuedSynchronizer（CLH队列锁）
+
+Mutex、ReentrantLock、ReentrantReadWriteLock、CountDownLatch、CyclicBarrier、Semaphor
+
+### ReentrantLock可重入锁
+
+<https://www.jianshu.com/p/b6efbdbdc6fa>
+
+### Mutex不可重入锁
 
 ## 参考
 

@@ -120,6 +120,8 @@ public class UnsafeDemo {
 
 * 线程挂起/恢复
 
+[AQS的原理](https://qigangzhong.github.io/2019/11/27/AQS-unsafe/)就是通过unsafe的park/unpark函数来实现线程挂起和恢复来达到加锁等待的。
+
 ```java
 public native void unpark(Object var1);
 public native void park(boolean var1, long var2);

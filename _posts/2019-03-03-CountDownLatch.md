@@ -183,6 +183,74 @@ public class CacheHealthChecker extends BaseHealthChecker{//实现同上}
 public class DatabaseHealthChecker extends BaseHealthChecker{//实现同上}
 ```
 
+### 原理
+
+```java
+public class CountDownLatch {
+    //利用了AQS内部类的共享锁的机制来实现的
+    private static final class Sync extends AbstractQueuedSynchronizer {
+        private static final long serialVersionUID = 4982264981922014374L;
+
+        Sync(int count) {
+            setState(count);
+        }
+
+        int getCount() {
+            return getState();
+        }
+
+        protected int tryAcquireShared(int acquires) {
+            //调用await的时候其实就是判断state是否被减到0了
+            return (getState() == 0) ? 1 : -1;
+        }
+
+        protected boolean tryReleaseShared(int releases) {
+            // Decrement count; signal when transition to zero
+            for (;;) {
+                int c = getState();
+                if (c == 0)
+                    return false;
+                int nextc = c-1;
+                if (compareAndSetState(c, nextc))
+                    return nextc == 0;
+            }
+        }
+    }
+
+    private final Sync sync;
+
+    //1. 初始化的时候直接设置了state为一个数值
+    public CountDownLatch(int count) {
+        if (count < 0) throw new IllegalArgumentException("count < 0");
+        this.sync = new Sync(count);
+    }
+
+    public void await() throws InterruptedException {
+        //2. 调用了内部类的Sync.tryAcquireShared()方法
+        //其实就是判断state是否等于0了
+        sync.acquireSharedInterruptibly(1);
+    }
+
+    public boolean await(long timeout, TimeUnit unit)
+        throws InterruptedException {
+        return sync.tryAcquireSharedNanos(1, unit.toNanos(timeout));
+    }
+
+    //3. 将state数值减1
+    public void countDown() {
+        sync.releaseShared(1);
+    }
+
+    public long getCount() {
+        return sync.getCount();
+    }
+
+    public String toString() {
+        return super.toString() + "[Count = " + sync.getCount() + "]";
+    }
+}
+```
+
 ## 参考
 
 [什么时候使用CountDownLatch](http://www.importnew.com/15731.html)

@@ -59,7 +59,7 @@ private static ThreadLocal<String> tls = ThreadLocal.withInitial(() -> "hello");
 
 > 关于ThreadLocalMap<ThreadLocal, Object>弱引用问题：
 > 
-> 当线程没有结束，但是ThreadLocal已经被回收，则可能导致线程中存在ThreadLocalMap<null, Object>的键值对，造成内存泄露。（ThreadLocal被回收，ThreadLocal关联的线程共享变量还存在）。
+> 当线程没有结束，但是我们定义的ThreadLocal变量已经被回收，则可能导致线程中存在ThreadLocalMap<null, Object>的键值对，造成内存泄露。（ThreadLocal被回收，ThreadLocal关联的线程共享变量还存在）。
 > 
 > 虽然ThreadLocal的get，set方法可以清除ThreadLocalMap中key为null的value，但是get，set方法在内存泄露后并不会必然调用，所以为了防止此类情况的出现，我们有两种手段。
 > 

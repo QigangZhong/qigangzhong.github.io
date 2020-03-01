@@ -427,6 +427,16 @@ public class MainConfig2 {
 }
 ```
 
+### 循环依赖
+
+[Spring IOC 容器源码分析 - 循环依赖的解决办法](https://www.imooc.com/article/34150)
+
+1. 通过构造函数循环依赖，不允许
+
+2. 通过setter方式循环依赖，默认bean是单例的，允许，bean被实例化之后才设置setter属性，单例会被先放入缓存(map对象)，A依赖B，B依赖A，A和B都实例化完成了放入缓存了，然后才调用set方法设置依赖，这个时候直接从缓存中拿引用就可以了，避免了循环依赖报错
+
+3. 通过setter方式循环依赖，bean为prototype非单例，不允许
+
 ## 参考
 
 参考书籍：《精通Spring4.x企业应用开发实战》

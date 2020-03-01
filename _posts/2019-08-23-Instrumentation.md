@@ -31,7 +31,7 @@ author: 网络
 
 ## 介绍
 
-java中可以通过动态代理的方式来做一些AOP的事情，例如使用`JDK Proxy`、`CGLIB`、`ASM`、`javassist`，在不修改源码的情况下在一个类的方法执行前后做一些事情。使用`ASM`和`javasist`包还可以直接修改编译后的class。
+java中可以通过动态代理的方式来做一些AOP的事情，例如使用`JDK Proxy`、`CGLIB`、`ASM`、`javassist`，在不修改源码的情况下在一个类的方法执行前后做一些事情。使用`ASM`和`javassist`包还可以直接修改编译后的class。
 
 JDK自带的[java.lang.instrument](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)包其实也可以做到类似的事情，它也叫JavaAgent，或者java探针。它提供了两种方式来实现无侵入的instrument（监视？改造？增强？）你的java应用程序。可以结合`ASM`、`javassist`直接对字节码进行修改，让原有的功能更强大。
 

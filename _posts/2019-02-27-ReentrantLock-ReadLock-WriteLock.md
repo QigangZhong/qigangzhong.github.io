@@ -109,6 +109,12 @@ public class MyBlockingQueue<E> {
 }
 ```
 
+#### 公平锁
+
+[ReentrantLock 实现原理（公平锁和非公平锁）](https://zhuanlan.zhihu.com/p/94015814)
+
+ReentrantLock默认是非公平锁，直接先通过CAS将state+1尝试获取锁，多线程会争抢锁，而公平锁是直接插入到CLH队列的尾部等待锁，先到先得
+
 ### [ReetrantReadWriteLock](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/locks/ReentrantReadWriteLock.html)
 
 读写锁的机制：
