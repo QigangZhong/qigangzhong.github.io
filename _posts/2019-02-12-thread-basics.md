@@ -287,6 +287,13 @@ public class Child extends Thread {
 > 
 > 但是线程是有优先级的，优先级越高的人，就一定能第一个上车吗？这是不一定的，优先级高的人仅仅只是第一个上车的概率大了一点而已，最终第一个上车的，也有可能是优先级最低的人。并且所谓的优先级执行，是在大量执行次数中才能体现出来的。
 
+## 问题
+
+### 如何正确终止线程？
+
+1. 使用共享变量，要用volatile关键字，保证可见性，能够及时终止。
+2. 使用interrupt()和isInterrupted()配合使用。
+
 ## 参考
 
 [Java 多线程编程](http://www.runoob.com/java/java-multithreading.html)

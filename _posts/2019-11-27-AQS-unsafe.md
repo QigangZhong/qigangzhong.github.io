@@ -87,7 +87,7 @@ public class Park_Unpark {
 }
 ```
 
-## 二、AbstractQueuedSynchronizer（CLH队列锁）
+## 二、AQS(AbstractQueuedSynchronizer，CLH队列锁)
 
 Mutex、ReentrantLock、ReentrantReadWriteLock、CountDownLatch、CyclicBarrier、Semaphor
 
@@ -96,6 +96,75 @@ Mutex、ReentrantLock、ReentrantReadWriteLock、CountDownLatch、CyclicBarrier�
 <https://www.jianshu.com/p/b6efbdbdc6fa>
 
 ### Mutex不可重入锁
+
+### CountDownLatch
+
+### CyclicBarrier
+
+```java
+import java.util.Random;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class CyclicBarrierDemo {
+    private CyclicBarrier cb = new CyclicBarrier(4);
+    private Random rnd = new Random();
+
+    class TaskDemo implements Runnable{
+        private String id;
+        TaskDemo(String id){
+            this.id = id;
+        }
+        @Override
+        public void run(){
+            try {
+                Thread.sleep(rnd.nextInt(10000));
+                System.out.println("Thread " + id + " will wait");
+                //等待其它线程全部执行完
+                cb.await();
+                //大家都执行完了一起做一件事情
+                System.out.println("-------Thread " + id + " is over");
+            } catch (InterruptedException e) {
+            } catch (BrokenBarrierException e) {
+            }
+        }
+    }
+
+    public static void main(String[] args){
+        CyclicBarrierDemo cbd = new CyclicBarrierDemo();
+        ExecutorService es = Executors.newCachedThreadPool();
+        es.submit(cbd.new TaskDemo("a"));
+        es.submit(cbd.new TaskDemo("b"));
+        es.submit(cbd.new TaskDemo("c"));
+        es.submit(cbd.new TaskDemo("d"));
+        es.shutdown();
+    }
+}
+```
+
+### Semaphor
+
+[Java并发33:Semaphore基本方法与应用场景实例](https://blog.csdn.net/hanchao5272/article/details/79780045)
+
+## Java中锁的类型
+
+### 自旋锁
+
+[Java中的自旋锁](https://blog.csdn.net/fuyuwei2015/article/details/83387536)
+
+* CLH队列自旋锁
+
+## 问题
+
+### 如何检测死锁
+
+1. jstack工具
+
+2. ThreadMXBean通过代码的方式检测
+
+[利用ThreadMXBean实现检测死锁](https://www.jianshu.com/p/6f9ddb5e05f9)
 
 ## 参考
 
