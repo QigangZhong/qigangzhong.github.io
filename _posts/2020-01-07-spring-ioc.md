@@ -191,10 +191,13 @@ BeanDefinitionRegistryPostProcessor#postProcessBeanDefinitionRegistry
 ConfigurationClassPostProcessor#postProcessBeanDefinitionRegistry
 ConfigurationClassPostProcessor#processConfigBeanDefinitions
 // 下面这个方法是判断配置类是full模式还是lite模式
-// full模式：就是标记@Configuration的类，里面的@Bean都是交给容器管理的，默认是单例的
-// lite模式：就是标记@Component,@ComponentScan,@Import,@ImportResource的类
+// 【full模式】：就是标记@Configuration的类，里面的@Bean都是交给容器管理的，默认是单例的
+// 【lite模式】：就是标记@Component,@ComponentScan,@Import,@ImportResource的类
+// 与完整的@Configuration不同，lite @Bean方法不能声明bean之间的依赖关系，【并且不会被CGLIB代理，**不是单例的**】
+//如果bean标记了@Configuration,@Component,@ComponentScan,@Import,@ImportResource会被加入到`List<BeanDefinitionHolder> configCandidates`集合，都当做配置类来处理
 ConfigurationClassUtils#checkConfigurationClassCandidate
-// 【核心方法】，这个方法里面处理了ImportSelect的实现类
+//回到ConfigurationClassPostProcessor类
+// 【核心方法】，这个方法里面处理了ImportSelector的实现类
 ConfigurationClassParser#parse
 
 // ************************************************************************
@@ -257,7 +260,7 @@ ConfigurationClassPostProcessor#enhanceConfigurationClasses
   * AutoConfigurationImportSelector
   * EnableCircuitBreakerImportSelector
 
-  > 在@Configuration中所有的bean处理之后执行，SpringBoot的自动配置EnableAutoConfigurationImportSelector就是使用的这种方式，自动配置必须在自定义配置之后执行，可以通过实现Ordered接口或者打上Order标签来制定顺序。
+  > 在@Configuration中所有的bean处理之后执行，SpringBoot的自动配置EnableAutoConfigurationImportSelector(老版本)/AutoConfigurationImportSelector(新版本)就是使用的这种方式，自动配置必须在自定义配置之后执行，可以通过实现Ordered接口或者打上Order标签来制定顺序。
 
 * ImportBeanDefinitionRegistrar
 
@@ -362,6 +365,16 @@ public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, Str
 //通过InjectionMetadata.inject->InjectElement.inject
 //实际执行的是AutowiredFieldElement.inject和AutowiredMethodElement.inject
 ```
+
+## 问题
+
+### bean循环依赖问题
+
+* 通过构造函数的方式循环依赖，不支持
+
+* 通过setter的方式循环依赖，默认单例，支持
+
+* 通过setter的方式循环依赖，prototype多例，不支持
 
 ## 参考
 
