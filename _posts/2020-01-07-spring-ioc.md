@@ -381,3 +381,5 @@ public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, Str
 [Spring源码-IOC容器(六)-bean的循环依赖](https://my.oschina.net/u/2377110/blog/979226)
 
 [@Import、DeferredImportSelector、ImportBeanDefinitionRegistrar的使用](https://blog.csdn.net/f641385712/article/details/88554592)
+
+[请别再问Spring Bean的生命周期了！](https://www.jianshu.com/p/1dec08d290c1)

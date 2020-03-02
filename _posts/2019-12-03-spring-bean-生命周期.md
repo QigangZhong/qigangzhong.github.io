@@ -442,3 +442,5 @@ public class MainConfig2 {
 参考书籍：《精通Spring4.x企业应用开发实战》
 
 [Life Cycle Management of a Spring Bean](https://javabeat.net/life-cycle-management-of-a-spring-bean/)
+
+[****请别再问Spring Bean的生命周期了！](https://www.jianshu.com/p/1dec08d290c1)
