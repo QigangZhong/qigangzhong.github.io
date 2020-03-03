@@ -571,24 +571,65 @@ public class Test {
 @Import(AspectJAutoProxyRegistrar.class)
 public @interface EnableAspectJAutoProxy {
 
-	/**
-	 * Indicate whether subclass-based (CGLIB) proxies are to be created as opposed
-	 * to standard Java interface-based proxies. The default is {@code false}.
-	 */
-	boolean proxyTargetClass() default false;
+    /**
+     * Indicate whether subclass-based (CGLIB) proxies are to be created as opposed
+     * to standard Java interface-based proxies. The default is {@code false}.
+     */
+    boolean proxyTargetClass() default false;
 
-	/**
-	 * Indicate that the proxy should be exposed by the AOP framework as a {@code ThreadLocal}
-	 * for retrieval via the {@link org.springframework.aop.framework.AopContext} class.
-	 * Off by default, i.e. no guarantees that {@code AopContext} access will work.
-	 * @since 4.3.1
-	 */
-	boolean exposeProxy() default false;
+    /**
+     * Indicate that the proxy should be exposed by the AOP framework as a {@code ThreadLocal}
+     * for retrieval via the {@link org.springframework.aop.framework.AopContext} class.
+     * Off by default, i.e. no guarantees that {@code AopContext} access will work.
+     * @since 4.3.1
+     */
+    boolean exposeProxy() default false;
 
 }
 ```
 
 核心就是`@Import(AspectJAutoProxyRegistrar.class)`，`AspectJAutoProxyRegistrar`这个类实现了`ImportBeanDefinitionRegistrar`，在`registerBeanDefinitions()`这个实现方法里面通过`AopConfigUtils`向容器里面注册了`AspectJAnnotationAutoProxyCreator`的子类`AnnotationAwareAspectJAutoProxyCreator`，在上面已经介绍过，这个类实现了`SmartInstantiationAwareBeanPostProcessor`，在最主要的实例化前方法`AbstractAutoProxyCreator.postProcessBeforeInstantiation()`和`AbstractAutoProxyCreator.postProcessAfterInitialization()`中通过动态代理来生成代理类。
+
+```java
+AbstractAutoProxyCreator.postProcessBeforeInstantiation()
+AbstractAutoProxyCreator.createProxy()
+
+//**************************************************************************************
+protected Object createProxy(Class<?> beanClass, @Nullable String beanName,
+        @Nullable Object[] specificInterceptors, TargetSource targetSource) {
+
+    if (this.beanFactory instanceof ConfigurableListableBeanFactory) {
+        AutoProxyUtils.exposeTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName, beanClass);
+    }
+
+    ProxyFactory proxyFactory = new ProxyFactory();
+    proxyFactory.copyFrom(this);
+
+    if (!proxyFactory.isProxyTargetClass()) {
+        if (shouldProxyTargetClass(beanClass, beanName)) {
+            proxyFactory.setProxyTargetClass(true);
+        }
+        else {
+            evaluateProxyInterfaces(beanClass, proxyFactory);
+        }
+    }
+
+    Advisor[] advisors = buildAdvisors(beanName, specificInterceptors);
+    proxyFactory.addAdvisors(advisors);
+    proxyFactory.setTargetSource(targetSource);
+    customizeProxyFactory(proxyFactory);
+
+    proxyFactory.setFrozen(this.freezeProxy);
+    if (advisorsPreFiltered()) {
+        proxyFactory.setPreFiltered(true);
+    }
+
+    return proxyFactory.getProxy(getProxyClassLoader());
+}
+//**************************************************************************************
+```
+
+可以看到它的底层其实就是ProxyFactory.getProxy()方法。
 
 ### 源码解析
 
@@ -728,3 +769,5 @@ else {
 [Spring AOP的核心类：AbstractAdvisorAutoProxy自动代理创建器深度剖析（AnnotationAwareAspectJAutoProxyCreator）](https://cloud.tencent.com/developer/article/1497767)
 
 [Spring AOP中@Pointcut切入点表达式最全面使用介绍](https://blog.csdn.net/f641385712/article/details/83543270)
+
+[Spring Aop底层原理详解（利用spring后置处理器实现AOP）](https://blog.csdn.net/baomw/article/details/84262006)
