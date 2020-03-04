@@ -371,7 +371,9 @@ http://localhost:8861/hi?name=zhangsan
 
 http://localhost:8862/hello?name=lisi
 
-## 隔离策略(线程池隔离vs信号量隔离)
+## hystrix原理
+
+### 隔离策略(线程池隔离vs信号量隔离)
 
 [Hystrix 服务的隔离策略对比，信号量与线程池隔离的差异](https://my.oschina.net/u/867417/blog/2120713)
 
@@ -381,13 +383,21 @@ http://localhost:8862/hello?name=lisi
 | 信号量隔离 | 不支持，如果阻塞，只能通过调用协议（如：socket超时才能返回） | 支持，当信号量达到maxConcurrentRequests后。再请求会触发fallback | 通过信号量的计数器 | 同步调用，不支持异步         | 小，只是个计数器                     |
 {: .table.table-bordered }
 
-### 线程池隔离
+#### 线程池隔离
 
 通过线程池的可以控制请求的数量，并且可以控制超时时间（Future.get(timeout)方法？），超过数量或者时间都可以选择抛弃请求或者执行fallback请求
 
-### 信号量隔离
+#### 信号量隔离
 
 通过信号量隔离只能控制请求的数量，不支持超时
+
+### 熔断器
+
+熔断器Circuit Breaker是位于线程池之前的组件。用户请求某一服务之后，Hystrix会先经过熔断器，此时如果熔断器的状态是打开（跳起），则说明已经熔断，这时将直接进行降级处理，不会继续将请求发到线程池。熔断器相当于在线程池之前的一层屏障。每个熔断器默认维护10个bucket ，每秒创建一个bucket ，每个blucket记录成功,失败,超时,拒绝的次数。当有新的bucket被创建时，最旧的bucket会被抛弃。
+
+* Closed：熔断器关闭状态，调用失败次数积累，到了阈值（或一定比例）则启动熔断机制；
+* Open：熔断器打开状态，此时对下游的调用都内部直接返回错误，不走网络，但设计了一个时钟选项，默认的时钟达到了一定时间（这个时间一般设置成平均故障处理时间，也就是MTTR），到了这个时间，进入半熔断状态；
+* Half-Open：半熔断状态，允许定量的服务请求，如果调用都成功（或一定比例）则认为恢复了，关闭熔断器，否则认为还没好，又回到熔断器打开状态；
 
 ## hystrix监控数据持久化
 
@@ -424,3 +434,5 @@ hystrix+InfluxDB+grafana
 [白话：服务降级与熔断的区别](https://segmentfault.com/a/1190000012137439)
 
 [Spring Cloud构建微服务架构：服务容错保护（Hystrix断路器）【Dalston版】](http://blog.didispace.com/spring-cloud-starter-dalston-4-3/)
+
+[熔断机制HYSTRIX](https://www.cnblogs.com/yawen/p/6655352.html)
