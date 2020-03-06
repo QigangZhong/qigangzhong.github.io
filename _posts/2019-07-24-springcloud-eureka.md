@@ -205,6 +205,30 @@ server.port=8861
 eureka.client.service-url.defaultZone=http://localhost:8761/eureka/,http://localhost:8762/eureka/,http://localhost:8763/eureka/
 ```
 
+### 集群原理
+
+![eureka集群原理.png](/images/springcloud/eureka集群原理.png)
+
+* eureka客户端与eureka服务器默认保持30s的心跳，重新续约服务
+
+#### 集群保护机制
+
+Eureka Server 在运行期间会去统计心跳失败比例在 15 分钟之内是否低于 85%，如果低于 85%，Eureka Server 即会进入自我保护机制。
+
+Eureka Server 进入自我保护机制，会出现以下几种情况：
+
+1. Eureka 不再从注册列表中移除因为长时间没收到心跳而应该过期的服务
+2. Eureka 仍然能够接受新服务的注册和查询请求，但是不会被同步到其它节点上(即保证当前节点依然可用)
+3. 当网络稳定时，当前实例新的注册信息会被同步到其它节点中
+
+### 集群二级缓存机制
+
+![eureka集群缓存机制.png](/images/springcloud/eureka集群缓存机制.png)
+
+* 为什么要有二级缓存？为什么不直接用ConcurrentHashMap？
+
+如果集群数量非常大，直接用ConcurrentHashMap肯定性能受到影响，通过缓存的方式来解决这个问题，缓存使用读写分离机制，性能更佳。
+
 ## 问题
 
 1. 心跳机制是如何实现的？
