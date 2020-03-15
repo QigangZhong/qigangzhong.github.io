@@ -872,7 +872,25 @@ POST synonymtest/_analyze
 }
 ```
 
-## 六、Java SDK
+## 六、扩容
+
+<https://www.elastic.co/guide/cn/elasticsearch/guide/current/_scale_horizontally.html>
+
+## 七、原理
+
+### write、read原理
+
+
+
+### refresh、flush
+
+[ES中Refresh和Flush的区别](https://www.jianshu.com/p/15837be98ffd)
+
+### 倒排索引、正排索引
+
+
+
+## 八、Java SDK
 
 [Java API](https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/index.html)
 
