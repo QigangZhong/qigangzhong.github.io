@@ -235,6 +235,18 @@ tar -zxvf target.tar
 
 [Linux Sort 按照某一列排序](https://www.jianshu.com/p/f218f98725a4)
 
+## 其它
+
+### 查看系统信息
+
+```bash
+# 查看centos版本
+cat /etc/redhat-release
+# 查看内核版本
+uname -a
+cat /proc/version
+```
+
 ## 参考
 
 [linux命令大全](https://www.runoob.com/linux/linux-command-manual.html)
