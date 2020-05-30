@@ -500,7 +500,7 @@ vim hdfs-site.xml
 </configuration>
 ```
 
-
+【注意】：如果内存不够大会出现50070端口起不来的情况
 
 ##### [修改hadoop-env.sh]()
 
