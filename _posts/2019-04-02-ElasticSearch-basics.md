@@ -4,22 +4,13 @@ title:  "ElasticSearch 基础"
 categories: tools
 tags:  es
 author: 刚子
+
 ---
 
 * content
-{:toc}
+  {:toc}
 
 总结ElasticSearch的基础知识点
-
-
-
-
-
-
-
-
-
-
 
 ## 一、简易教程
 
@@ -324,6 +315,148 @@ curl -X PUT "localhost:9200/website/blog/1?version=1" -H 'Content-Type: applicat
 ```
 
 更多请参考[乐观并发控制](https://www.elastic.co/guide/cn/elasticsearch/guide/current/optimistic-concurrency-control.html#optimistic-concurrency-control)
+
+### 案例
+
+```bash
+PUT _template/coupon_search_template
+{
+    "order":10,
+    "index_patterns":[
+        "coupon_search_*"
+    ],
+    "settings":{
+        "index.number_of_replicas":"1",
+        "index.number_of_shards":"2",
+        "index.refresh_interval":"1s",
+        "index.search.slowlog.level":"info",
+        "index.search.slowlog.threshold.fetch.debug":"100ms",
+        "index.search.slowlog.threshold.fetch.info":"500ms",
+        "index.search.slowlog.threshold.fetch.trace":"50ms",
+        "index.search.slowlog.threshold.fetch.warn":"1s",
+        "index.search.slowlog.threshold.query.debug":"100ms",
+        "index.search.slowlog.threshold.query.info":"500ms",
+        "index.search.slowlog.threshold.query.trace":"50ms",
+        "index.search.slowlog.threshold.query.warn":"1s",
+        "index.unassigned.node_left.delayed_timeout":"1d"
+    },
+    "mappings":{
+        "dynamic":false,
+        "properties":{
+            "ztoUserId":{
+                "type":"keyword"
+            },
+            "couponSn":{
+                "type":"keyword"
+            },
+            "mobile":{
+                "type":"keyword"
+            },
+            "orderId":{
+                "type":"keyword"
+            },
+            "receiveTime":{
+                "type":"date",
+                "format":"yyyy-MM-dd HH:mm:ss",
+                "locale":"zh_CN"
+            }
+        }
+    },
+    "aliases":{
+        "coupon_alias":{}
+    }
+}
+
+PUT coupon_search_all
+
+POST /coupon_search_all/_doc
+{
+"ztoUserId":"123456",
+
+"couponSn":"CS0001",
+
+"mobile":"13057271932",
+
+"orderId":"O0001",
+
+"receiveTime":"2020-01-01 08:00:00"
+}
+
+GET /coupon_search_all/_search
+
+GET /coupon_search_all/_search
+{
+  "query": {
+    "match": {
+      "mobile": "13057271932"
+    }
+  }
+}
+
+GET /coupon_search_all/_search
+{
+  "query": {
+    "wildcard": {
+      "mobile": {
+        "value": "1305727*"
+      }
+    }
+  },
+  "sort": [
+    {
+      "receiveTime": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+GET /coupon_search_all/_search
+{
+  "query": {
+    "prefix": {
+      "mobile": {
+        "value": "13057"
+      }
+    }
+  },
+  "sort": [
+    {
+      "receiveTime": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+POST /coupon_search_all/_update/QAivYXcB89UkBtu30_Fl
+{
+  "doc":{
+    "mobile":"13057271933"
+  }
+}
+```
+
+### 字段类型
+
+#### date
+
+```bash
+#给example索引新增一个birthday字段，类型为date, 格式可以是yyyy-MM-dd 或 yyyy-MM-dd HH:mm:ss
+#添加日期类型的映射
+PUT test_label_supplier/docs/_mapping
+{
+  "properties": {
+    "birthday": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis",
+      "ignore_malformed": false,
+      "null_value": null
+    }
+  }
+}
+
+```
 
 ## 三、Kibana
 
@@ -874,21 +1007,17 @@ POST synonymtest/_analyze
 
 ## 六、扩容
 
-<https://www.elastic.co/guide/cn/elasticsearch/guide/current/_scale_horizontally.html>
+[https://www.elastic.co/guide/cn/elasticsearch/guide/current/_scale_horizontally.html](https://www.elastic.co/guide/cn/elasticsearch/guide/current/_scale_horizontally.html)
 
 ## 七、原理
 
 ### write、read原理
-
-
 
 ### refresh、flush
 
 [ES中Refresh和Flush的区别](https://www.jianshu.com/p/15837be98ffd)
 
 ### 倒排索引、正排索引
-
-
 
 ## 八、Java SDK
 
@@ -909,7 +1038,6 @@ POST synonymtest/_analyze
 [elasticsearch的keyword与text的区别](https://www.cnblogs.com/fengda/p/10348607.html)
 
 * segment是什么？
-
 * 创建doc的过程
 
 协调节点hash取模`shard = hash(document_id) % (num_of_primary_shards)`，确定在哪个分片，分片所在节点写入Memory Buffer，默认1秒refresh一次到Filesystem Cache，写入translog，flush到磁盘（30分钟一次，或translog大于512M）。flush之后新的translog被创建老的删除，MemoryBuffer写入新segment然后清空，写入新的提交点。
@@ -919,7 +1047,6 @@ POST synonymtest/_analyze
 ES中的doc是不可变的，删除是在磁盘上segment对应的.del文件中做标记，更新一样，只是把老的version的doc标记删除，查询的时候标记删除的记录依然可以匹配查询，但是会被过滤掉。在
 
 * 搜索的过程
-
 * ES是如何做master选举的？集群脑裂怎么解决？
 
 ZenDiscovery模块，nodeId排序，达到n/2+1
