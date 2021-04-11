@@ -4,21 +4,13 @@ title:  "FactoryBean BeanFactory"
 categories: spring
 tags: spring
 author: 网络
+
 ---
 
 * content
-{:toc}
+  {:toc}
 
 总结FactoryBean以及BeanFactory相关的知识点
-
-
-
-
-
-
-
-
-
 
 ## FactoryBean
 
@@ -141,7 +133,7 @@ public class SpringBootFactoryBeanApplication {
 
 #### 接口类图
 
-![beanfactory](/images/spring/beanfactory.png)
+![beanfactory](../images/spring/beanfactory.png)
 
 #### 基础实现接口
 
@@ -172,7 +164,7 @@ DefaultListableBeanFactory是BeanDefinitionRegistry的一个实现，实现方�
 
 #### 类图
 
-![applicationcontext](/images/spring/ApplicationContext.png)
+![applicationcontext](../images/spring/ApplicationContext.png)
 
 #### AbstractApplicationContext.refresh（IOC初始化的核心方法）
 
@@ -299,7 +291,7 @@ BeanUtils.instantiateClass();
 
 #### ClassPathApplicationContext
 
-![ClassPathApplicationContext](/images/spring/ClassPathApplicationContext.png)
+![ClassPathApplicationContext](../images/spring/ClassPathApplicationContext.png)
 
 #### AnnotationConfigApplicationContext
 

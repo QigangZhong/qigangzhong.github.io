@@ -4,23 +4,16 @@ title:  "spring bean 生命周期"
 categories: spring
 tags:  spring
 author: 网络
+
 ---
 
 * content
-{:toc}
+  {:toc}
 
 转自[Spring Bean的生命周期](https://blog.csdn.net/u012385190/article/details/81368748)
 
 Spring的生命周期是指实例化Bean时所经历的一系列阶段，即通过getBean()获取bean对象及设置对象属性时，Spring框架做了哪些事。Bean的生命周期从Spring容器实例化Bean到销毁Bean。
 本文分别对 BeanFactory 和 ApplicationContext 中的生命周期进行分析。
-
-
-
-
-
-
-
-
 
 ## 一、BeanFactory实例化Bean相关接口
 
@@ -365,11 +358,8 @@ public class ApplicationContexBeanLifeCycleMain {
 ## 六、总结
 
 * 1、Spring的生命周期可以从 BeanFactory 和 ApplicationContext 中的生命周期进行分析；
-
 * 2、BeanFactory实例化Bean相关接口分为Bean级和容器级。bean级接口我们一般不实现，容器级如果需要处理一些共有特性，可以考虑实现；
-
 * 3、ApplicationContext中bean的生命周期与BeanFactory类似。beanFactory中的后处理器接口需要调用addBeanPostProcessor方法进行注册，而ApplicationContext中的后处理器可以通过配置和反射进行调用；
-
 * 4、从上可以看到Bean的生命周期相关接口很多，如果都实现很复杂。通常我们的业务都可以通过 init-method 和 destory-method 方法配置来解决，这样做简单粗暴。
 
 ## 补充
@@ -380,7 +370,8 @@ public class ApplicationContexBeanLifeCycleMain {
 >
 > * 第一种【推荐】：通过@PostConstruct 和 @PreDestroy 方法 实现初始化后和销毁bean之前进行的操作，可以替代下面两种方式
 >
-> > PostConstruct注解依靠CommonAnnotationBeanPostProcessor的父类InitDestroyAnnotationBeanPostProcessor执行,当你启动注解功能`<context:annotation-config/>`会自动帮你注册CommonAnnotationBeanPostProcessor。当bean初始化的时候(对应方法AbstractAutowireCapableBeanFactory.initializeBean),会执行applyBeanPostProcessorsBeforeInitialization方法:所有注册的BeanPostProcessors的postProcessBeforeInitialization方法都会被执行(你的PostConstruct注解的执行就在这里面的InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization方法)
+>> PostConstruct注解依靠CommonAnnotationBeanPostProcessor的父类InitDestroyAnnotationBeanPostProcessor执行,当你启动注解功能`<context:annotation-config/>`会自动帮你注册CommonAnnotationBeanPostProcessor。当bean初始化的时候(对应方法AbstractAutowireCapableBeanFactory.initializeBean),会执行applyBeanPostProcessorsBeforeInitialization方法:所有注册的BeanPostProcessors的postProcessBeforeInitialization方法都会被执行(你的PostConstruct注解的执行就在这里面的InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization方法)
+>>
 >
 > * 第二种是：通过 在xml中定义init-method 和 destory-method方法
 > * 第三种是：通过bean实现InitializingBean和 DisposableBean接口
@@ -432,9 +423,7 @@ public class MainConfig2 {
 [Spring IOC 容器源码分析 - 循环依赖的解决办法](https://www.imooc.com/article/34150)
 
 1. 通过构造函数循环依赖，不允许
-
 2. 通过setter方式循环依赖，默认bean是单例的，允许，bean被实例化之后才设置setter属性，单例会被先放入缓存(map对象)，A依赖B，B依赖A，A和B都实例化完成了放入缓存了，然后才调用set方法设置依赖，这个时候直接从缓存中拿引用就可以了，避免了循环依赖报错
-
 3. 通过setter方式循环依赖，bean为prototype非单例，不允许
 
 ## 参考
