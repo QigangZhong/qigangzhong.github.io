@@ -4,47 +4,39 @@ title:  "wait、notify、notifyAll"
 categories: thread
 tags:  thread
 author: 网络
+
 ---
 
 * content
-{:toc}
+  {:toc}
 
 总结java线程基础知识
 
 * wait、notify、notifyAll
 
-
-
-
-
-
-
-
-
 ## 一. 示例
 
 ### 1. 方法介绍
 
-> void notify()  
-> Wakes up a single thread that is waiting on this object’s monitor.  
+> void notify()
+> Wakes up a single thread that is waiting on this object’s monitor.
 > 译：唤醒在此对象监视器上等待的单个线程
-> 
-> void notifyAll()  
-> Wakes up all threads that are waiting on this object’s monitor.   
+>
+> void notifyAll()
+> Wakes up all threads that are waiting on this object’s monitor.
 > 译：唤醒在此对象监视器上等待的所有线程
-> 
-> void wait( )  
-> Causes the current thread to wait until another thread invokes the notify() method or the notifyAll( ) method for this object.  
+>
+> void wait( )
+> Causes the current thread to wait until another thread invokes the notify() method or the notifyAll( ) method for this object.
 > 译：导致当前的线程等待，直到其他线程调用此对象的notify( ) 方法或 notifyAll( ) 方法
-> 
-> void wait(long timeout)  
-> Causes the current thread to wait until either another thread invokes the notify( ) method or the notifyAll( ) method for this object, or a specified amount of time has > elapsed.  
+>
+> void wait(long timeout)
+> Causes the current thread to wait until either another thread invokes the notify( ) method or the notifyAll( ) method for this object, or a specified amount of time has > elapsed.
 > 译：导致当前的线程等待，直到其他线程调用此对象的notify() 方法或 notifyAll() 方法，或者指定的时间过完。
-> 
-> void wait(long timeout, int nanos)  
-> Causes the current thread to wait until another thread invokes the notify( ) method or the notifyAll( ) method for this object, or some other thread interrupts the current > thread, or a certain amount of real time has elapsed.  
+>
+> void wait(long timeout, int nanos)
+> Causes the current thread to wait until another thread invokes the notify( ) method or the notifyAll( ) method for this object, or some other thread interrupts the current > thread, or a certain amount of real time has elapsed.
 > 译：导致当前的线程等待，直到其他线程调用此对象的notify( ) 方法或 notifyAll( ) 方法，或者其他线程打断了当前线程，或者指定的时间过完。
-
 
 ### 2. 简单示例
 
@@ -98,6 +90,7 @@ public class WaitAndNotify {
     }
 }
 ```
+
 ```
 运行结果：
 java.lang.Object@1540e19d
@@ -131,12 +124,12 @@ notify唤醒一个等待的线程；notifyAll唤醒所有等待的线程。
 ### 3. 生产者-消费者问题
 
 #### 什么是生产者-消费者问题?
+
 ![producer_consumer.jpg](/images/thread/producer_consumer.jpg)
 
-> 假设有一个公共的容量有限的池子，有两种人，一种是生产者，另一种是消费者。需要满足如下条件：  
-> 1、生产者产生资源往池子里添加，前提是池子没有满，如果池子满了，则生产者暂停生产，直到自己的生成能放下池子。  
+> 假设有一个公共的容量有限的池子，有两种人，一种是生产者，另一种是消费者。需要满足如下条件：
+> 1、生产者产生资源往池子里添加，前提是池子没有满，如果池子满了，则生产者暂停生产，直到自己的生成能放下池子。
 > 2、消费者消耗池子里的资源，前提是池子的资源不为空，否则消费者暂停消耗，进入等待直到池子里有资源数满足自己的需求。
-
 
 ```java
 public interface AbstractStorage {
@@ -431,7 +424,33 @@ class Consumer extends Thread {
 }
 ```
 
+## 问题
+
+### 1. 为什么wait、notify必须在持有锁的情况下才能执行？
+
+a. 如果在未持有对象锁的情况下调用object.wait()/notify()，直接会报错，JDK已经做好保护。
+
+b. 判断条件与wait()方法分为两个步骤，在不加锁的情况下，假设thread1在执行到两个步骤中间的时候thread2执行了条件设置和nofity()方法，那thread1的wait就错过了notify通知。
+
+通过互斥锁来保证wait()/notify()之间的先后顺序，才能保证wait不会错过notify，从而导致wait线程一直挂着。
+
+![](../images/thread/wait-notify.jpg)
+
+### 2. 为什么在Object中提供wait、nodify方法?为什么不是在Thread中提供？
+
+a. wait()方法告诉当前线程释放监视器(monitor)并将线程放入等待队列，直到其它线程进入相同的监视器(monitor)并调用nodify()
+
+b. notify()唤醒在这个对象的监视器(monitor)上等待的单个线程
+
+c. 这两个方法是线程之间通信的方式，都是monitor级别的方法，monitor是关联到Object的而不是Thread的(所有对象都有监视器monitor)
+
+d. 如果仅仅在Thread中提供这两种方法，那一个线程必须知道其它线程的状态，其它线程在等待哪些资源，这样才能(调用thread2.nofity())通知它们去获取这些资源，然而在java里面线程之间是无法互相知道对方状态的
+
+
+![](../images/thread/java-monitor-associate-with-object.jpg)
+
 ## 参考
+
 [wait和notify的理解与使用](https://blog.csdn.net/jianiuqi/article/details/53448849)
 
 [java中的notify和notifyAll有什么区别？](https://www.zhihu.com/question/37601861/answer/94679949)
@@ -441,3 +460,7 @@ class Consumer extends Thread {
 [java中的notify和notifyAll有什么区别？](https://blog.csdn.net/djzhao/article/details/79410229)
 
 [为什么wait,notify和notifyAll要与synchronized一起使用？](https://blog.csdn.net/qq_39907763/article/details/79301813)
+
+[Why must wait() always be in synchronized block](https://stackoverflow.com/questions/2779484/why-must-wait-always-be-in-synchronized-block)
+
+[How can the wait() and notify() methods be called on Objects that are not threads?](https://stackoverflow.com/questions/16197135/how-can-the-wait-and-notify-methods-be-called-on-objects-that-are-not-thread)
