@@ -59,7 +59,7 @@ public class TestThread {
    public static void main(String args[]) {
       RunnableDemo R1 = new RunnableDemo( "Thread-1");
       R1.start();
-    
+  
       RunnableDemo R2 = new RunnableDemo( "Thread-2");
       R2.start();
    }
@@ -108,7 +108,7 @@ public class TestThread {
    public static void main(String args[]) {
       ThreadDemo T1 = new ThreadDemo( "Thread-1");
       T1.start();
-    
+  
       ThreadDemo T2 = new ThreadDemo( "Thread-2");
       T2.start();
    }
@@ -173,14 +173,14 @@ public class Test {
         Task task = new Task();
         Future<Integer> future = executorService.submit(task);
         executorService.shutdown();
-      
+    
         System.out.println("主线程在执行任务...");
         try {
             Thread.sleep(2000);
         } catch(InterruptedException ex) {
             ex.printStackTrace();
         }
-       
+     
         try {
             System.out.println("task运行结果:"+future.get());
         } catch (InterruptedException ex) {
@@ -212,14 +212,14 @@ public class Test {
         FutureTask<Integer> futureTask = new FutureTask<Integer>(task);
         executorService.submit(futureTask);
         executorService.shutdown();
-      
+    
         System.out.println("主线程在执行任务...");
         try {
             Thread.sleep(2000);
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
-       
+     
         try {
             System.out.println("task运行结果:"+futureTask.get());
         } catch (InterruptedException ex) {
@@ -227,7 +227,7 @@ public class Test {
         } catch (ExecutionException ex) {
             ex.printStackTrace();
         }
-       
+     
         System.out.println("所有任务执行完毕");
     }
 }
