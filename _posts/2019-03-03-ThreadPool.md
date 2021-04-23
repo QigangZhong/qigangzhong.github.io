@@ -4,10 +4,11 @@ title:  "线程池"
 categories: thread
 tags:  thread
 author: 网络
+
 ---
 
 * content
-{:toc}
+  {:toc}
 
 ## 前言
 
@@ -17,12 +18,6 @@ author: 网络
 
 * ThreadPoolExecutor
 * Executors
-
-
-
-
-
-
 
 ### `ThreadPoolExecutor`
 
@@ -37,23 +32,21 @@ public ThreadPoolExecutor(int corePoolSize,int maximumPoolSize,long keepAliveTim
 
 1.几个核心参数概念:
 
-* corePoolSize  
-池大小，如果当前线程池中的线程数目小于corePoolSize，则每来一个任务，就会创建一个线程去执行这个任务，当线程池中任务数量到达该值时，新的任务会放到队列中
-* maximumPoolSize  
-最大线程数，超过这个数量就拒绝服务
-* keepAliveTime  
-表示线程没有任务执行时最多保持多久会终止。默认情况下，只有当线程池中的线程数大于corePoolSize时，keepAliveTime才会起作用，直到线程池中的线程数不大于corePoolSize，即当线程池中的线程数大于corePoolSize时，如果一个线程空闲的时间达到keepAliveTime，则会终止，直到线程池中的线程数不超过corePoolSize。但是如果调用了allowCoreThreadTimeOut(boolean)方法，在线程池中的线程数不大于corePoolSize时，keepAliveTime参数也会起作用，直到线程池中的线程数为0
-* unit  
-参数keepAliveTime的时间单位，有7种取值
-* workQueue  
-一个阻塞队列，用来存储等待执行的任务，这个参数的选择也很重要，会对线程池的运行过程产生重大影响，一般来说，这里的阻塞队列有以下几种选择：
+* corePoolSize
+  池大小，如果当前线程池中的线程数目小于corePoolSize，则每来一个任务，就会创建一个线程去执行这个任务，当线程池中任务数量到达该值时，新的任务会放到队列中
+* maximumPoolSize
+  最大线程数，超过这个数量就拒绝服务
+* keepAliveTime
+  表示线程没有任务执行时最多保持多久会终止。默认情况下，只有当线程池中的线程数大于corePoolSize时，keepAliveTime才会起作用，直到线程池中的线程数不大于corePoolSize，即当线程池中的线程数大于corePoolSize时，如果一个线程空闲的时间达到keepAliveTime，则会终止，直到线程池中的线程数不超过corePoolSize。但是如果调用了allowCoreThreadTimeOut(boolean)方法，在线程池中的线程数不大于corePoolSize时，keepAliveTime参数也会起作用，直到线程池中的线程数为0
+* unit
+  参数keepAliveTime的时间单位，有7种取值
+* workQueue一个阻塞队列，用来存储等待执行的任务，这个参数的选择也很重要，会对线程池的运行过程产生重大影响，一般来说，这里的阻塞队列有以下几种选择：
   * ArrayBlockingQueue(必须指定队列大小)、PriorityBlockingQueue  使用较少
   * LinkedBlockingQueue: 基于链表的先进先出队列，如果创建时没有指定此队列大小，则默认为Integer.MAX_VALUE
   * SynchronousQueue: 这个队列比较特殊，它不会保存提交的任务，而是将直接新建一个线程来执行新来的任务
-* threadFactory  
-线程工厂，主要用来创建线程，不指定则默认使用DefaultThreadFactory(创建线程规则：非守护线程，Thread.NORM_PRIORITY)
-* handler  
-表示当拒绝处理任务时的策略，有以下四种取值:
+* threadFactory
+  线程工厂，主要用来创建线程，不指定则默认使用DefaultThreadFactory(创建线程规则：非守护线程，Thread.NORM_PRIORITY)
+* handler表示当拒绝处理任务时的策略，有以下四种取值:
   * ThreadPoolExecutor.AbortPolicy:丢弃任务并抛出RejectedExecutionException异常
   * ThreadPoolExecutor.DiscardPolicy：也是丢弃任务，但是不抛出异常
   * ThreadPoolExecutor.DiscardOldestPolicy：丢弃队列最前面的任务，然后重新尝试执行任务（重复此过程）
@@ -62,17 +55,15 @@ public ThreadPoolExecutor(int corePoolSize,int maximumPoolSize,long keepAliveTim
 2.注意事项
 
 > * ThreadPoolExecutor将根据 corePoolSize和 maximumPoolSize设置的边界自动调整池大小
-当新任务在方法 execute(java.lang.Runnable) 中提交时，如果运行的线程少于 corePoolSize，则创建新线程来处理请求，即使其他辅助线程是空闲的。
+>   当新任务在方法 execute(java.lang.Runnable) 中提交时，如果运行的线程少于 corePoolSize，则创建新线程来处理请求，即使其他辅助线程是空闲的。
 > * 如果运行的线程多于 corePoolSize 而少于 maximumPoolSize，则仅当队列满时才创建新线程
-如果无法将请求加入队列，则创建新的线程，除非创建此线程超出 maximumPoolSize，超过数量的任务将被拒绝。
+>   如果无法将请求加入队列，则创建新的线程，除非创建此线程超出 maximumPoolSize，超过数量的任务将被拒绝。
 > * 如果设置的 corePoolSize 和 maximumPoolSize 相同，则创建了固定大小的线程池。
 > * 如果将 maximumPoolSize 设置为基本的无界值（如 Integer.MAX_VALUE），则允许池适应任意数量的并发任务。
 > * 在大多数情况下，核心和最大池大小仅基于构造函数来设置，不过也可以使用 setCorePoolSize(int) 和 setMaximumPoolSize(int) 进行动态更改。
->
 > * 并不是先加入任务就一定会先执行，假设队列大小为 4，corePoolSize为2，maximumPoolSize为6，那么当加入15个任务时，
-执行的顺序类似这样：首先执行任务 1、2，然后任务3~6被放入队列。这时候队列满了，任务7、8、9、10 会被马上执行，而任务 11~15 则会抛出异常。最终顺序是：1、2、7、8、9、10、3、4、5、6。  
-> 当然这个过程是针对指定大小的`ArrayBlockingQueue<Runnable>`来说，如果是默认的LinkedBlockingQueue<Runnable>，因为该队列无大小限制，maximumPoolSize会无效，队列大小不受控制，会有资源耗尽的风险。
->
+>   执行的顺序类似这样：首先执行任务 1、2，然后任务3~6被放入队列。这时候队列满了，任务7、8、9、10 会被马上执行，而任务 11~15 则会抛出异常。最终顺序是：1、2、7、8、9、10、3、4、5、6。
+>   当然这个过程是针对指定大小的`ArrayBlockingQueue<Runnable>`来说，如果是默认的LinkedBlockingQueue<Runnable>，因为该队列无大小限制，maximumPoolSize会无效，队列大小不受控制，会有资源耗尽的风险。
 > * 最多能执行多少个任务？？？ maximumPoolSize+队列长度，超过这个数字之后就拒绝接受任务
 
 ```java
@@ -206,7 +197,6 @@ private static final int TERMINATED =  3 << COUNT_BITS;
 > Executors各个方法的弊端：
 >
 > 1) `newFixedThreadPool`和`newSingleThreadExecutor`主要的问题是队列长度不受控制，可能会有OOM风险
->
 > 2) `newCachedThreadPool`和`newScheduledThreadPool`主要问题是maximumPoolSize=Integer.MAX_VALUE，可能会有OOM风险
 
 ```java
@@ -253,7 +243,7 @@ if (delay != null && delay > 0) {
 }
 //**************************************************************************************************************
 
-    
+  
 
 
 //4. 创建一个单线程化的线程池，它只会用唯一的工作线程来执行任务，保证所有任务按照指定顺序(FIFO, LIFO, 优先级)执行，corePoolSize和maximumPoolSize都被设置为1
@@ -301,7 +291,6 @@ private static AtomicReference<ExecutorService> serviceRef = new AtomicReference
 //第一步，初始化线程池
 public static void init(String maxPoolSizeStr) {
     if (serviceRef.get() == null) {
-        Class var1 = ThreadPoolExecutorDemo.class;
         synchronized(ThreadPoolExecutorDemo.class) {
             if (serviceRef.get() == null) {
                 int maxPoolSize = 50;

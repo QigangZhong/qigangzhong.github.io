@@ -173,14 +173,14 @@ public class Test {
         Task task = new Task();
         Future<Integer> future = executorService.submit(task);
         executorService.shutdown();
-    
+  
         System.out.println("主线程在执行任务...");
         try {
             Thread.sleep(2000);
         } catch(InterruptedException ex) {
             ex.printStackTrace();
         }
-     
+   
         try {
             System.out.println("task运行结果:"+future.get());
         } catch (InterruptedException ex) {
@@ -212,14 +212,14 @@ public class Test {
         FutureTask<Integer> futureTask = new FutureTask<Integer>(task);
         executorService.submit(futureTask);
         executorService.shutdown();
-    
+  
         System.out.println("主线程在执行任务...");
         try {
             Thread.sleep(2000);
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
-     
+   
         try {
             System.out.println("task运行结果:"+futureTask.get());
         } catch (InterruptedException ex) {
@@ -227,7 +227,7 @@ public class Test {
         } catch (ExecutionException ex) {
             ex.printStackTrace();
         }
-     
+   
         System.out.println("所有任务执行完毕");
     }
 }
@@ -280,7 +280,7 @@ public class Child extends Thread {
 >
 > 但是线程是有优先级的，优先级越高的人，就一定能第一个上车吗？这是不一定的，优先级高的人仅仅只是第一个上车的概率大了一点而已，最终第一个上车的，也有可能是优先级最低的人。并且所谓的优先级执行，是在大量执行次数中才能体现出来的。
 
-## 线程状态
+## 三. 线程状态
 
 Java线程共有5中状态，分别为：新建(new)、就绪(runnable)、运行(running)、堵塞(blocked)、死亡(dead)。
 
@@ -296,6 +296,20 @@ Java线程共有5中状态，分别为：新建(new)、就绪(runnable)、运行
 >
 > 1. 上图运行中、就绪状态要调换一下位置
 > 2. 超时等待翻译为**定时等待**比较好理解
+
+## 四. 守护线程
+
+### 概念
+
+在Java中有两类线程：User Thread(用户线程)、Daemon Thread(守护线程)
+
+只要当前JVM实例中尚存在任何一个非守护线程没有结束，守护线程就全部工作；只有当最后一个非守护线程结束时，守护线程随着JVM一同结束工作。
+
+### 注意点
+
+(1) thread.setDaemon(true)必须在thread.start()之前设置，否则会抛出一个IllegalThreadStateException异常。你不能把正在运行的常规线程设置为守护线程。
+(2) 在Daemon线程中产生的新线程也是Daemon的。
+(3) 不要认为所有的应用都可以分配给Daemon来进行服务，比如读写操作或者计算逻辑。因为你不可能知道在所有的User完成之前，Daemon是否已经完成了预期的服务任务。一旦User退出了，可能大量数据还没有来得及读入或写出，计算任务也可能多次运行结果不一样。这对程序是毁灭性的。造成这个结果理由就是，一旦所有User Thread离开了，虚拟机也就退出运行了。
 
 ## 问题
 
