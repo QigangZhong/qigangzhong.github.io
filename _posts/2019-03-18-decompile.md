@@ -59,3 +59,5 @@ http://java-decompiler.github.io/
 ## 参考
 
 [JVM参数汇总](https://www.cnblogs.com/duanxz/p/3482366.html)
+
+[Java Class文件结构解析 及 实例分析验证](https://blog.csdn.net/tjiyu/article/details/53870153)

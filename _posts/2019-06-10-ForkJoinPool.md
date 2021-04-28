@@ -19,7 +19,7 @@ author: 网络
 
 ## 一、 概念
 
-![ForkJoinPool.jpg](/images/thread/ForkJoinPool.jpg) ![ThreadPoolExecutor.jpg](/images/thread/ThreadPoolExecutor.jpg)
+![ForkJoinPool.jpg](../images/thread/ForkJoinPool.jpg) ![ThreadPoolExecutor.jpg](../images/thread/ThreadPoolExecutor.jpg)
 
 ForkJoinPool与ThreadPoolExecutor都继承于AbstractExecutorService线程池抽象类，所以都是线程池的一种。ForkJoinPool利用Fork/Join分治思想，将一个大的任务拆成小任务，小任务再继续拆成更小的任务，一直拆到不能再拆（最小任务的粒度达到一个阀值），然后再递归汇总每个任务计算的值，得到最终的结果。
 
