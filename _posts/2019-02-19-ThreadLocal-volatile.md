@@ -91,6 +91,8 @@ private static ThreadLocal<String> tls = ThreadLocal.withInitial(() -> "hello");
 > * 一个处理器的缓存回写到内存会导致其他处理器的缓存失效；
 > * 当处理器发现本地缓存失效后，就会从内存中重读该变量数据，即可以获取当前最新值。
 
+[volatile可见性和防止指令重排原理](https://blog.csdn.net/sinat_32873711/article/details/106619965)
+
 ### 2. 应用场景
 
 * 状态标记
@@ -138,3 +140,5 @@ class Singleton{
 [让你彻底理解volatile](https://www.jianshu.com/p/157279e6efdb)
 
 [*****正确使用 Volatile 变量](https://www.ibm.com/developerworks/cn/java/j-jtp06197.html)
+
+[volatile内存屏障及实现原理分析(JMM和MESI)](https://blog.csdn.net/zwx900102/article/details/106306915/)
