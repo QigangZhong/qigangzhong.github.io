@@ -8,6 +8,7 @@ author: 刚子
 ---
 
 * content
+  
   {:toc}
 
 总结ElasticSearch的基础知识点
@@ -1011,13 +1012,17 @@ POST synonymtest/_analyze
 
 ## 七、原理
 
-### write、read原理
+### 写数据原理，查询原理
+
+[ElasticSearch进阶篇集群+原理](https://blog.csdn.net/sinat_16658263/article/details/90444038)
 
 ### refresh、flush
 
-[ES中Refresh和Flush的区别](https://www.jianshu.com/p/15837be98ffd)
+[**ES中Refresh和Flush的区别](https://www.jianshu.com/p/15837be98ffd)
 
-### 倒排索引、正排索引
+### 倒排索引
+
+[Elasticsearch 如何做到快速检索 - 倒排索引的秘密](https://segmentfault.com/a/1190000037658997)
 
 ## 八、Java SDK
 
