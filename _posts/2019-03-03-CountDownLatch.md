@@ -263,25 +263,25 @@ Semaphore只是控制线程的数量，并不能实现同步，所以如果需�
 
 ```java
 final Semaphore semaphore = new Semaphore(2);
-        ExecutorService executorService = Executors.newCachedThreadPool();
-        for (int i = 0; i < 10; i++) {
-            final int index = i;
-            executorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        semaphore.acquire();
-                        System.out.println("线程:" + Thread.currentThread().getName() + "获得许可:" + index);
-                        TimeUnit.SECONDS.sleep(1);
-                        semaphore.release();
-                        System.out.println("TASK个数：" + semaphore.availablePermits());
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
+ExecutorService executorService = Executors.newCachedThreadPool();
+for (int i = 0; i < 10; i++) {
+    final int index = i;
+    executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                semaphore.acquire();
+                System.out.println("线程:" + Thread.currentThread().getName() + "获得许可:" + index);
+                TimeUnit.SECONDS.sleep(1);
+                semaphore.release();
+                System.out.println("TASK个数：" + semaphore.availablePermits());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
-        executorService.shutdown();
+    });
+}
+executorService.shutdown();
 ```
 
 ## CyclicBarrier
