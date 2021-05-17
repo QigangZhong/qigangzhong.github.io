@@ -233,9 +233,15 @@ Eureka Server 进入自我保护机制，会出现以下几种情况：
 
 1. 心跳机制是如何实现的？
 
+## 开源注册中心对比
 
+[服务的注册与发现（Consul、zookeeper、etcd、eureka、Nacos）](https://xinyuan.blog.csdn.net/article/details/102608442)
+
+[Nacos整体概况](https://www.jianshu.com/p/3f4f6554b67c)
 
 ## 参考
+
+[***拜托！面试请不要再问我Spring Cloud底层原理！](https://blog.csdn.net/qq_42046105/article/details/83793787)
 
 [springcloud官网](https://spring.io/projects/spring-cloud)
 

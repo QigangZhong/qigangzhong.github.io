@@ -383,13 +383,36 @@ http://localhost:8862/hello?name=lisi
 | 信号量隔离 | 不支持，如果阻塞，只能通过调用协议（如：socket超时才能返回） | 支持，当信号量达到maxConcurrentRequests后。再请求会触发fallback | 通过信号量的计数器 | 同步调用，不支持异步         | 小，只是个计数器                     |
 {: .table.table-bordered }
 
+[Hystrix的线程池隔离和信号量隔离](https://blog.csdn.net/javaer_lee/article/details/87942816)
+
 #### 线程池隔离
 
 通过线程池的可以控制请求的数量，并且可以控制超时时间（Future.get(timeout)方法？），超过数量或者时间都可以选择抛弃请求或者执行fallback请求
 
+```java
+public MyHystrixCommand(String name) {
+    super(HystrixCommand.Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("MyGroup"))
+            .andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
+                    .withExecutionIsolationStrategy(HystrixCommandProperties.ExecutionIsolationStrategy.THREAD))
+            .andThreadPoolPropertiesDefaults(HystrixThreadPoolProperties.Setter().withCoreSize(10)
+                    .withMaxQueueSize(100).withMaximumSize(100)));
+    this.name = name;
+}
+```
+
 #### 信号量隔离
 
 通过信号量隔离只能控制请求的数量，不支持超时
+
+```java
+super(HystrixCommand.Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("MyGroup"))
+        .andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
+            .withExecutionIsolationStrategy(HystrixCommandProperties.ExecutionIsolationStrategy.SEMAPHORE
+
+            )));
+    this.name = name;
+}
+```
 
 ### 熔断器
 
