@@ -8,6 +8,7 @@ author: 网络
 ---
 
 * content
+  
   {:toc}
 
 转自[Spring Bean的生命周期](https://blog.csdn.net/u012385190/article/details/81368748)
@@ -81,7 +82,7 @@ public PropertyValues postProcessPropertyValues(PropertyValues pvs, PropertyDesc
 //实例化完成，setBeanName/setBeanFactory完成之后调用该方法
 public Object postProcessBeforeInitialization(Object o, String s) throws BeansException;
 
-//全部是实例化完成以后调用该方法
+//全部实例化完成以后调用该方法
 public Object postProcessAfterInitialization(Object o, String s) throws BeansException;
 ```
 
