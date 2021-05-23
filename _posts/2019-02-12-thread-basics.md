@@ -8,6 +8,7 @@ author: 网络
 ---
 
 * content
+  
   {:toc}
 
 总结java线程基础知识
@@ -144,7 +145,7 @@ public class TestThread {
 >
 > 实现Runnable无法返回执行结果，实现Callable无法直接通过Thread包装执行(只能提交给ExecutorService执行)
 > 而FutureTask兼顾两者优点
-> ![FutureTask.jpg](../images/thread/FutureTask.jpg)
+> ![FutureTask.jpg](/images/thread/FutureTask.jpg)
 >
 > ```java
 > FutureTask futureTask = new FutureTask(new Callable<String>() {  
@@ -290,7 +291,7 @@ Java线程共有5中状态，分别为：新建(new)、就绪(runnable)、运行
 4. 阻塞状态：线程在运行过程中可能由于各种原因放弃了cpu 使用权，暂时停止运行，即进入阻塞状态。阻塞的情况分为：等待阻塞、同步阻塞、其他阻塞等三种情况。
 5. 死亡状态：线程run()、main() 方法执行结束，或者因异常退出了run()方法，则该线程结束生命周期。
 
-![](../images/thread/thread-status.jpg)
+![](/images/thread/thread-status.jpg)
 
 > 注:
 >

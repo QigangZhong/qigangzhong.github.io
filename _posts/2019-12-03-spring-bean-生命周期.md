@@ -90,6 +90,10 @@ public Object postProcessAfterInitialization(Object o, String s) throws BeansExc
 当Sprig容器创建任何Bean的时候，这两个后处理器都会发生作用，所以这两个后处理器的影响是全局的。用户可以通过合理的代码控制后处理器只对固定的Bean创建进行处理。
 Bean级生命周期接口解决Bean个性化处理的问题，Bean容器级生命周期接口解决容器中某些Bean共性化处理的问题。
 
+#### 3、BeanFactoryPostProcessor
+
+其实BeanFactoryPostProcessor也算是一个容器级别的接口，可以对bean的definition做一些自定义的事情，比如修改属性之类
+
 ## 二、BeanFactory的bean生命周期相关代码
 
 ### 1、xml bean 配置
