@@ -23,6 +23,8 @@ author: 网络
 
 ## 一. ThreadLocal
 
+[****并发——深入分析ThreadLocal的实现原理](https://www.cnblogs.com/tuyang1129/p/12713815.html)
+
 ### 1. 介绍
 
 > 线程本地变量，存储变量在每个线程中独立的副本
@@ -67,6 +69,24 @@ private static ThreadLocal<String> tls = ThreadLocal.withInitial(() -> "hello");
 > 
 > 2、JDK建议ThreadLocal定义为`private static`，这样ThreadLocal的弱引用问题则不存在了。
 
+### 4. ThreadLocalMap解决hash冲突
+
+```java
+ThreadLocalMap(ThreadLocal<?> firstKey, Object firstValue) {
+    //初始化table
+    table = new ThreadLocal.ThreadLocalMap.Entry[INITIAL_CAPACITY];
+    //计算索引，通过key(也就是ThreadLocal变量的引用)的hashcode对INITIAL_CAPACITY(默认16)取模得到数组位置i
+    int i = firstKey.threadLocalHashCode & (INITIAL_CAPACITY - 1);
+    //设置值
+    table[i] = new ThreadLocal.ThreadLocalMap.Entry(firstKey, firstValue);
+    size = 1;
+    //设置阈值
+    setThreshold(INITIAL_CAPACITY);
+}
+```
+
+[ThreadLocalMap线性探测法解决hash冲突](https://blog.csdn.net/xiaoxiaodaxiake/article/details/107732928)
+
 ## 二、volatile
 
 ### 1.介绍
@@ -92,6 +112,8 @@ private static ThreadLocal<String> tls = ThreadLocal.withInitial(() -> "hello");
 > * 当处理器发现本地缓存失效后，就会从内存中重读该变量数据，即可以获取当前最新值。
 
 [volatile可见性和防止指令重排原理](https://blog.csdn.net/sinat_32873711/article/details/106619965)
+
+[***【并发编程系列4】JMM中happens-before规则和as-if-serial语义](https://blog.csdn.net/zwx900102/article/details/106320017)
 
 ### 2. 应用场景
 

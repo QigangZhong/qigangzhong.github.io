@@ -434,7 +434,7 @@ b. 判断条件与wait()方法分为两个步骤，在不加锁的情况下，�
 
 通过互斥锁来保证wait()/notify()之间的先后顺序，才能保证wait不会错过notify，从而导致wait线程一直挂着。
 
-![](../images/thread/wait-notify.jpg)
+![](/images/thread/wait-notify.jpg)
 
 ### 2. 为什么在Object中提供wait、nodify方法?为什么不是在Thread中提供？
 
@@ -447,7 +447,7 @@ c. 这两个方法是线程之间通信的方式，都是monitor级别的方法�
 d. 如果仅仅在Thread中提供这两种方法，那一个线程必须知道其它线程的状态，其它线程在等待哪些资源，这样才能(调用thread2.nofity())通知它们去获取这些资源，然而在java里面线程之间是无法互相知道对方状态的
 
 
-![](../images/thread/java-monitor-associate-with-object.jpg)
+![](/images/thread/java-monitor-associate-with-object.jpg)
 
 ## 参考
 
